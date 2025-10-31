@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url = env("POSTGRES_PRISMA_URL") // uses connection pooling
+  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
+}
+
+model User {
+  id                String    @id @default(cuid())
+  email             String    @unique
+  name              String?
+  passwordHash      String
+  createdAt         DateTime  @default(now())
+  activeSession     Session?  @relation("ActiveSession", fields: [activeSessionId], references: [id])
+  activeSessionId   String?   @unique
+  sessions          Session[] @relation("UserSessions")
+  scrapedItems      ScrapedItem[]
+  resetToken        String?   @unique
+  resetTokenExpires DateTime?
+  rememberMeToken   String?   @unique
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  user      User     @relation("UserSessions", fields: [userId], references: [id])
+  userId    String
+  createdAt DateTime @default(now())
+  expiresAt DateTime?
+  // optional back relation for the activeSession relation
+  activeFor  User?   @relation("ActiveSession")
+}
+
+model ScrapedItem {
+  id        String   @id @default(cuid())
+  title     String
+  url       String   @unique
+  source    String?
+  content   String?
+  fetchedAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id])
+  userId    String?
+}
+
+model WorkerStatus {
+  name      String   @id
+  lastRun   DateTime
+  error     String?
+}
