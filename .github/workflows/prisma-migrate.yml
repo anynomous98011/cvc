@@ -1,0 +1,39 @@
+name: Prisma migrate on push
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    env:
+      # These need to be set in the repository Secrets (Settings → Secrets → Actions)
+      DATABASE_URL: ${{ secrets.POSTGRES_PRISMA_URL }}
+      NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Run Prisma migrations (deploy)
+        run: npx prisma migrate deploy --schema=prisma/schema.prisma
+        env:
+          DATABASE_URL: ${{ secrets.POSTGRES_PRISMA_URL }}
+
+      - name: Run smoke script (optional)
+        run: node scripts/smoke-test.js
+        env:
+          BASE_URL: ${{ secrets.BASE_URL }}
+          BYPASS_TOKEN: ${{ secrets.VERCEL_BYPASS_TOKEN }}

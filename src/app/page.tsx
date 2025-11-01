@@ -41,6 +41,7 @@ const features = [
 ];
 
 export default function Home() {
+  // Trigger deployment
   return (
     <div className="relative flex flex-col min-h-[calc(100vh-4rem)] overflow-hidden">
       <SocialRain />

@@ -140,3 +140,58 @@ The following routes require authentication:
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details
+
+## Final deployment steps (what still needs to be done)
+
+I deployed the app to Vercel already, but there are a couple of manual steps left in the Vercel dashboard before the production URL is publicly usable and the database migrations are applied.
+
+1) Add environment variables to Vercel (Production)
+
+   Required variables (set these under Project → Settings → Environment Variables):
+   - `POSTGRES_PRISMA_URL` — your Neon pooled connection URL (used by Prisma)
+   - `POSTGRES_URL_NON_POOLING` — the direct Neon URL (if used anywhere)
+   - `NEXTAUTH_SECRET` — a secure random value (32+ bytes base64)
+
+   Example using the Vercel CLI (you must be logged in):
+
+   ```powershell
+   vercel env add POSTGRES_PRISMA_URL production
+   vercel env add POSTGRES_URL_NON_POOLING production
+   vercel env add NEXTAUTH_SECRET production
+   ```
+
+2) Disable Deployment Protection (optional — required for public access)
+
+   If your deployment is protected by Vercel Access / Deployment Protection, visitors will get a 401. To make the site public:
+   - Vercel → your Project → Settings → General → Deployment Protection / Access
+   - Turn off protection or set Production to "Public"
+
+3) Add GitHub Secrets for CI (optional but recommended)
+
+   The repository includes a GitHub Actions workflow at `.github/workflows/prisma-migrate.yml` that runs `prisma migrate deploy` on pushes to `master`.
+   Add these secrets under GitHub → Settings → Secrets → Actions:
+   - `POSTGRES_PRISMA_URL` (same value as above)
+   - `NEXTAUTH_SECRET`
+   - `BASE_URL` (optional — used by the smoke test)
+   - `VERCEL_BYPASS_TOKEN` (optional — used by the smoke test)
+
+4) Trigger a redeploy
+
+   - Push a commit to `master` or trigger a redeploy in Vercel. The GitHub Action will run migrations automatically if the secrets are configured.
+
+5) Run the smoke test (local)
+
+   Locally you can run:
+   ```powershell
+   # without Vercel bypass (will show 401 if protection is enabled)
+   npm run smoke
+
+   # with Vercel bypass token (if you want to keep protection enabled)
+   $env:BYPASS_TOKEN='your_token_here'; npm run smoke
+   ```
+
+If you want me to run the smoke tests and verify signup/login for you, either:
+- Disable deployment protection and reply "done", or
+- Provide a Vercel bypass token here (private) and I will run the tests immediately.
+
+If you'd like I can also add a helper script to set Vercel env vars via the Vercel API — you'll need to provide a Vercel token or run the script locally.

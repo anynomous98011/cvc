@@ -1,18 +1,26 @@
 "use client";
-import { useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 
 export default function PasswordResetConfirmPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [error, setError] = useState('');
 
-  // Get token from URL query parameter
-  const token = searchParams.get('token');
+  // Get token from URL query parameter (avoid next/navigation hook during prerender)
+  const [token, setToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      setToken(params.get('token'));
+    } catch (e) {
+      setToken(null);
+    }
+  }, []);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
