@@ -17,8 +17,9 @@ async function run() {
         
         try {
           // Start with the base URL
-          const { links } = await scrapingQueue.add(config.baseUrl, config);
-          
+          const result = await scrapingQueue.add(config.baseUrl, config);
+          const { links } = result || { links: [] };
+
           // Queue discovered links for scraping (up to 10 per site)
           if (links?.length) {
             for (const link of links.slice(0, 10)) {

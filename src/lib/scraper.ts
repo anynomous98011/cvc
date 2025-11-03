@@ -139,25 +139,29 @@ export async function scrapeUrl(url: string, config: SiteConfig) {
 
 // Queue system to prevent overwhelming sites
 class ScrapingQueue {
-  private queue: { url: string; config: SiteConfig }[] = [];
+  private queue: { url: string; config: SiteConfig; resolve: (value: any) => void; reject: (reason?: any) => void }[] = [];
   private processing = false;
   private delay = 1000; // 1 second between requests
 
   async add(url: string, config: SiteConfig) {
-    this.queue.push({ url, config });
-    if (!this.processing) {
-      this.processing = true;
-      await this.processQueue();
-    }
+    return new Promise((resolve, reject) => {
+      this.queue.push({ url, config, resolve, reject });
+      if (!this.processing) {
+        this.processing = true;
+        this.processQueue();
+      }
+    });
   }
 
   private async processQueue() {
     while (this.queue.length > 0) {
       const next = this.queue.shift()!;
       try {
-        await scrapeUrl(next.url, next.config);
+        const result = await scrapeUrl(next.url, next.config);
+        next.resolve(result);
       } catch (err) {
         console.error(`Failed to scrape ${next.url}:`, err);
+        next.reject(err);
       }
       await new Promise(resolve => setTimeout(resolve, this.delay));
     }
