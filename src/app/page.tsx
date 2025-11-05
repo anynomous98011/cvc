@@ -12,6 +12,7 @@ import { ArrowRight, Bot, Search, TrendingUp, Zap } from 'lucide-react';
 import Link from 'next/link';
 import { SocialRain } from '@/components/social-rain';
 import { Icons } from '@/components/icons';
+import { useState } from 'react';
 
 const features = [
   {
@@ -27,12 +28,6 @@ const features = [
     href: '/seo-analyzer',
   },
   {
-    icon: <Bot className="h-10 w-10" />,
-    title: 'AI Assistant',
-    description: 'Get AI-powered suggestions to improve your content.',
-    href: '/ai-assistant',
-  },
-  {
     icon: <TrendingUp className="h-10 w-10" />,
     title: 'Trend Discovery',
     description: 'Discover the latest trends and hashtags in your niche.',
@@ -41,7 +36,7 @@ const features = [
 ];
 
 export default function Home() {
-  // Trigger deployment
+
   return (
     <div className="relative flex flex-col min-h-[calc(100vh-4rem)] overflow-hidden">
       <SocialRain />
@@ -60,7 +55,7 @@ export default function Home() {
                 </p>
               </div>
               <div className="space-x-4">
-                <Button asChild size="lg">
+                <Button asChild size="lg" className="transition-all duration-200 hover:scale-105">
                   <Link href="/creator-studio">
                     Start Creating <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>

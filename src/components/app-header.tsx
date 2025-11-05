@@ -13,35 +13,17 @@ const navItems = [
   { label: 'Home', href: '/' },
   { label: 'Create', href: '/creator-studio' },
   { label: 'SEO', href: '/seo-analyzer'},
-  { label: 'AI Assistant', href: '/ai-assistant' },
   { label: 'Trending', href: '/trending' },
   { label: 'Viral Trends', href: '/viral-trends' },
-  { label: 'Scraped Data', href: '/scraped-items' },
 ];
 
 export function AppHeader() {
   const pathname = usePathname();
   const [isMounted, setIsMounted] = useState(false);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [user, setUser] = useState<{ id: string; email: string; name?: string } | null>(null);
 
   useEffect(() => {
     setIsMounted(true);
-  }, []);
-
-  useEffect(() => {
-    // fetch session
-    let mounted = true;
-    (async () => {
-      try {
-        const res = await fetch('/api/auth/session');
-        const data = await res.json();
-        if (mounted) setUser(data.user ?? null);
-      } catch (e) {
-        if (mounted) setUser(null);
-      }
-    })();
-    return () => { mounted = false };
   }, []);
 
   useEffect(() => {
@@ -63,7 +45,7 @@ export function AppHeader() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                    'transition-colors hover:text-foreground/80',
+                    'transition-all duration-200 hover:text-foreground/80 hover:scale-105',
                     pathname === item.href
                     ? 'text-foreground font-semibold'
                     : 'text-foreground/60'
@@ -94,7 +76,7 @@ export function AppHeader() {
                             key={item.href}
                             href={item.href}
                             className={cn(
-                                'transition-colors hover:text-foreground/80',
+                                'transition-all duration-200 hover:text-foreground/80 hover:scale-105',
                                 pathname === item.href
                                 ? 'text-foreground'
                                 : 'text-foreground/60'
@@ -109,19 +91,6 @@ export function AppHeader() {
 
           <div className="flex items-center gap-2">
             {isMounted ? <ThemeToggle /> : <div className="h-10 w-10" />}
-            {isMounted && (
-              user ? (
-                <div className="flex items-center gap-2">
-                  <span className="hidden sm:inline text-sm">{user.name ?? user.email}</span>
-                  <Button variant="ghost" size="sm" onClick={async () => { await fetch('/api/auth/logout', { method: 'POST' }); window.location.reload(); }}>Logout</Button>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <Link href="/auth/login" className="text-sm">Sign in</Link>
-                  <Link href="/auth/signup" className="text-sm">Sign up</Link>
-                </div>
-              )
-            )}
           </div>
         </div>
       </div>
