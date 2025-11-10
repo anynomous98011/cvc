@@ -68,6 +68,7 @@
     "@types/nodemailer": "^7.0.3",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@types/wav": "^1.0.4",
     "axios": "^1.7.3",
     "bcryptjs": "^2.4.3",
     "cheerio": "^1.0.0-rc.12",

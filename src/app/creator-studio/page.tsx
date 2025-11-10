@@ -58,7 +58,12 @@ const textContentSchema = z.object({
 });
 
 const mediaContentSchema = z.object({
-  media: z.any().refine((val) => val, 'Please upload a file'),
+  media: z.any().refine((val) => val, 'Please upload a file').refine((val) => {
+    if (!val) return false;
+    // Check if data URI is too large (limit to ~4MB to prevent AI model issues)
+    const sizeInBytes = (val.length * 3) / 4; // Approximate size from base64
+    return sizeInBytes <= 4 * 1024 * 1024; // 4MB limit
+  }, 'File size too large. Please upload an image smaller than 4MB.'),
 });
 
 const seoSchema = z.object({
@@ -224,6 +229,12 @@ export default function CreatorStudioPage() {
   const handleMediaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Check file size before processing (4MB limit)
+      if (file.size > 4 * 1024 * 1024) {
+        mediaForm.setError('media', { message: 'File size too large. Please upload an image smaller than 4MB.' });
+        return;
+      }
+
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreview(reader.result as string);

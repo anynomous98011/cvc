@@ -75,7 +75,7 @@ export async function generateContent(
       const result: GenerateViralContentOutput = {
         viralTitles: ideas || [],
         seoDescriptions: (ideas || []).map(idea => `${idea} - Optimized for ${input.platform} in 2025. Discover trending ${input.topic} content that drives engagement and social media reach.`),
-        hashtags: [`#${input.topic.replace(/\s+/g, '')}`, `#${input.platform.replace(/\s+/g, '')}`, `#${input.style}Content`, `#Viral${input.topic}`, `#${input.platform}Tips`, `#2025Trends`, `#SocialMediaGrowth`, `#ContentMarketing`, `#${input.topic}Hacks`, `#${input.platform}Algorithm`],
+        hashtags: await generateTrends(input.topic),
         thumbnailIdeas: (ideas || []).slice(0, Math.min(ideas.length, 3)).map(idea => `High-converting thumbnail for: ${idea} - Eye-catching design with ${input.platform} branding and trending elements`),
         aiImagePrompts: (ideas || []).slice(0, Math.min(ideas.length, 3)).map(idea => `Create a viral ${input.style} image for ${input.platform}: ${idea}. Include trending 2025 design elements, high contrast colors, and social media optimized composition for maximum engagement and reach.`)
       };
@@ -276,18 +276,7 @@ export async function discoverTrends(
         const platform = input.platform || 'social media';
 
         const fallbackResult: TrendingContentOutput = {
-          trendingHashtags: [
-            `#${topic.replace(/\s+/g, '')}`,
-            `#${platform.replace(/\s+/g, '')}Trends`,
-            `#${topic}2025`,
-            `#FutureOf${topic}`,
-            `#${platform}Content`,
-            `#Viral${topic}`,
-            `#${topic}Hacks`,
-            `#${platform}Algorithm`,
-            `#ContentMarketing`,
-            `#SocialMediaGrowth`
-          ],
+          trendingHashtags: await generateTrends(topic),
           viralContentIdeas: [
             `${topic} transformation stories on ${platform} - Real user journeys that inspire massive engagement`,
             `Behind-the-scenes ${topic} content creation - Authentic content that builds trust and community`,

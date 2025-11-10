@@ -6,5 +6,10 @@
   "regions": ["fra1"],
   "env": {
     "DATABASE_URL": "file:./prisma/dev.db"
+  },
+  "functions": {
+    "src/app/api/**/*.ts": {
+      "maxDuration": 30
+    }
   }
 }
