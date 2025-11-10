@@ -16,16 +16,12 @@ export type Icon = LucideIcon;
 
 export const Icons = {
   logo: (props: React.SVGProps<SVGSVGElement>) => (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 100 100"
+    <img
+      src="/logo.png"
+      alt="CVC Logo"
       {...props}
-      fill="currentColor"
-    >
-      <circle cx="50" cy="50" r="45" fill="currentColor" opacity="0.1"/>
-      <circle cx="50" cy="50" r="35" fill="none" stroke="currentColor" strokeWidth="3"/>
-      <text x="50" y="55" textAnchor="middle" fontSize="24" fontWeight="bold" fill="currentColor">CVC</text>
-    </svg>
+      className="h-12 w-12 object-contain"
+    />
   ),
   google: (props: React.SVGProps<SVGSVGElement>) => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512" fill="currentColor" {...props}>

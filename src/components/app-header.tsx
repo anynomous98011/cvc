@@ -34,10 +34,10 @@ export function AppHeader() {
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center">
         <Link href="/" className="mr-6 flex items-center space-x-2">
-          <Icons.logo className="h-8 w-8 text-primary" />
+          <Icons.logo className="h-8 w-8" />
           <span className="font-headline text-2xl font-bold">CVC</span>
         </Link>
-        
+
         {/* Desktop Nav */}
         <nav className="hidden items-center gap-6 text-sm md:flex">
             {navItems.map((item) => (
@@ -67,7 +67,7 @@ export function AppHeader() {
             </SheetTrigger>
             <SheetContent side="left">
                 <Link href="/" className="mr-6 flex items-center space-x-2 mb-8">
-                    <Icons.logo className="h-8 w-8 text-primary" />
+                    <Icons.logo className="h-8 w-8" />
                     <span className="font-headline text-2xl font-bold">CVC</span>
                 </Link>
                 <nav className="flex flex-col gap-6 text-lg font-medium">

@@ -54,5 +54,35 @@ export const SITE_CONFIGS: SiteConfig[] = [
       content: { selector: 'p.col-9.color-text-secondary.my-1.pr-4' },
       links: { selector: 'h1.h3.lh-condensed a', attribute: 'href' }
     }
+  },
+  {
+    name: 'Gartner Predictions',
+    baseUrl: 'https://www.gartner.com/en/documents',
+    rules: {
+      title: { selector: 'h1' },
+      content: { selector: '.document-content' },
+      date: { selector: 'time', attribute: 'datetime' },
+      links: { selector: 'a[href*="/en/documents/"]', attribute: 'href' }
+    }
+  },
+  {
+    name: 'IEEE Future Directions',
+    baseUrl: 'https://futuredirections.ieee.org',
+    rules: {
+      title: { selector: 'h2.article-title' },
+      content: { selector: '.article-content' },
+      date: { selector: 'time', attribute: 'datetime' },
+      links: { selector: 'a[href*="/articles/"]', attribute: 'href' }
+    }
+  },
+  {
+    name: 'World Economic Forum',
+    baseUrl: 'https://www.weforum.org/agenda',
+    rules: {
+      title: { selector: 'h1.article-title' },
+      content: { selector: '.article-content' },
+      date: { selector: 'time', attribute: 'datetime' },
+      links: { selector: 'a[href*="/agenda/"]', attribute: 'href' }
+    }
   }
 ];
