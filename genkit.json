@@ -1,0 +1,10 @@
+{
+  "flows": [
+    "src/ai/flows/analyze-media-and-generate-content.ts",
+    "src/ai/flows/analyze-seo-and-provide-recommendations.ts",
+    "src/ai/flows/discover-trending-content.ts",
+    "src/ai/flows/generate-viral-content.ts",
+    "src/ai/flows/get-content-idea-improvements.ts",
+    "src/ai/flows/get-viral-trends.ts"
+  ]
+}
