@@ -1,5 +1,9 @@
-# TODO: Update Logo in Web Application
+# TODO: Deploy Application to Vercel
 
-- [x] Update desktop logo src and alt text in app-header.tsx
-- [x] Update mobile logo src and alt text in app-header.tsx
-- [x] Verify logo displays correctly by running the application (manual verification needed)
+- [x] Fix vercel.json by removing invalid envDescription property
+- [x] Confirm env vars are set in Vercel (DATABASE_URL exists)
+- [ ] Run vercel --prod to deploy (currently running)
+- [ ] Wait for deployment to complete and get live URL
+- [ ] Whitelist MongoDB IP to 0.0.0.0/0 in MongoDB Atlas
+- [ ] Test signup and login on live site
+- [ ] Verify all features work (AI assistant, trending, etc.)

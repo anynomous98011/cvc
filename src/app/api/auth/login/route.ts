@@ -15,10 +15,16 @@ export async function POST(req: Request) {
       );
     }
 
-    // Find user
-    const user = await prisma.user.findUnique({
-      where: { email },
-    });
+    // Find user with better error handling
+    let user;
+    try {
+      user = await prisma.user.findUnique({
+        where: { email },
+      });
+    } catch (dbError) {
+      console.error('Database error during login:', dbError);
+      throw dbError;
+    }
 
     if (!user) {
       return Response.json(
@@ -28,7 +34,13 @@ export async function POST(req: Request) {
     }
 
     // Verify password
-    const isPasswordValid = await verifyPassword(password, user.passwordHash);
+    let isPasswordValid;
+    try {
+      isPasswordValid = await verifyPassword(password, user.passwordHash);
+    } catch (passwordError) {
+      console.error('Password verification error:', passwordError);
+      throw passwordError;
+    }
 
     if (!isPasswordValid) {
       return Response.json(
@@ -39,7 +51,12 @@ export async function POST(req: Request) {
 
     // Create session with crypto token generation
     const token = crypto.randomBytes(32).toString('hex');
-    await createSessionDirect(token, user.id);
+    try {
+      await createSessionDirect(token, user.id);
+    } catch (sessionError) {
+      console.error('Session creation error:', sessionError);
+      throw sessionError;
+    }
 
     // Set cookie
     const cookieStore = await cookies();
@@ -64,8 +81,10 @@ export async function POST(req: Request) {
     );
   } catch (error) {
     console.error('Login error:', error);
+    // Return more detailed error for debugging
+    const errorMessage = error instanceof Error ? error.message : 'Internal server error';
     return Response.json(
-      { error: 'Internal server error' },
+      { error: 'Internal server error', details: errorMessage },
       { status: 500 }
     );
   }

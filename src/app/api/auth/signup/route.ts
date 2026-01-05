@@ -30,9 +30,15 @@ export async function POST(req: Request) {
     }
 
     // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
-    }).catch(() => null);
+    let existingUser;
+    try {
+      existingUser = await prisma.user.findUnique({
+        where: { email },
+      });
+    } catch (dbError) {
+      console.error('Database error checking existing user:', dbError);
+      throw dbError;
+    }
 
     if (existingUser) {
       return Response.json(
@@ -44,10 +50,10 @@ export async function POST(req: Request) {
     // Hash password
     const passwordHash = await hashPassword(password);
 
-    // Create user - simplified without nested creates
+    // Create user
     let user;
     try {
-      user = await (prisma as any).user.create({
+      user = await prisma.user.create({
         data: {
           email,
           name,
@@ -55,6 +61,7 @@ export async function POST(req: Request) {
         },
       });
     } catch (error: any) {
+      console.error('User creation error:', error);
       if (error.code === 'P2002') {
         return Response.json(
           { error: 'Email already in use' },
@@ -66,7 +73,7 @@ export async function POST(req: Request) {
 
     // Create profile separately
     try {
-      await (prisma as any).profile.create({
+      await prisma.profile.create({
         data: {
           userId: user.id,
         },
@@ -103,8 +110,10 @@ export async function POST(req: Request) {
     );
   } catch (error) {
     console.error('Signup error:', error);
+    // Return more detailed error for debugging
+    const errorMessage = error instanceof Error ? error.message : 'Internal server error';
     return Response.json(
-      { error: 'Internal server error' },
+      { error: 'Internal server error', details: errorMessage },
       { status: 500 }
     );
   }
