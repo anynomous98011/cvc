@@ -1,5 +1,4 @@
 'use client';
-import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -22,47 +21,8 @@ import {
 } from '@/components/ui/table';
 import { getKeywordSuggestions } from '@/lib/ai/actions';
 
-// Auth wrapper
-function AuthWrapper({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const res = await fetch('/api/auth/me');
-        const data = await res.json();
-
-        if (!data.authenticated) {
-          router.push('/login');
-        }
-      } catch (error) {
-        router.push('/login');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkAuth();
-  }, [router]);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <span>Loading...</span>
-      </div>
-    );
-  }
-
-  return <>{children}</>;
-}
-
 export default function SeoAnalyzer() {
-  return (
-    <AuthWrapper>
-      <SeoAnalyzerContent />
-    </AuthWrapper>
-  );
+  return <SeoAnalyzerContent />;
 }
 
 function SeoAnalyzerContent() {

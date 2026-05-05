@@ -1,8 +1,9 @@
 "use client"
 
 import * as React from "react"
-import { Palette } from "lucide-react"
+import { Check, Palette } from "lucide-react"
 import { useTheme } from "next-themes"
+import { THEME_OPTIONS } from "@/lib/themes"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -24,30 +25,6 @@ export function ThemeToggle() {
     setTheme(value)
   }
 
-  const themes = [
-    { name: "Light", value: "theme-light" },
-    { name: "Dark", value: "theme-dark" },
-    { name: "Blue", value: "blue" },
-    { name: "Green", value: "green" },
-    { name: "Purple", value: "purple" },
-    { name: "Jarvis", value: "theme-jarvis" },
-    { name: "Neon Pink", value: "theme-neon-pink" },
-    { name: "Solar Flare", value: "theme-solar-flare" },
-    { name: "Ocean", value: "ocean" },
-    { name: "Forest", value: "forest" },
-    { name: "Sunset", value: "sunset" },
-    { name: "Midnight", value: "midnight" },
-    { name: "Lavender", value: "lavender" },
-    { name: "Mint", value: "mint" },
-    { name: "Rose", value: "rose" },
-    { name: "Amber", value: "amber" },
-    { name: "Teal", value: "teal" },
-    { name: "Indigo", value: "indigo" },
-    { name: "Coral", value: "coral" },
-    { name: "Sage", value: "sage" },
-    { name: "Crimson", value: "crimson" },
-  ]
-
   if (!mounted) return null
 
   return (
@@ -58,14 +35,15 @@ export function ThemeToggle() {
           <span className="sr-only">Toggle theme</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="max-h-80 overflow-y-auto">
-        {themes.map((themeOption) => (
+      <DropdownMenuContent align="end" className="max-h-80 w-52 overflow-y-auto">
+        {THEME_OPTIONS.map((themeOption) => (
           <DropdownMenuItem
             key={themeOption.value}
             onClick={() => handleThemeChange(themeOption.value)}
-            className={theme === themeOption.value ? "bg-accent" : ""}
+            className="flex items-center justify-between"
           >
             {themeOption.name}
+            {theme === themeOption.value ? <Check className="h-4 w-4" /> : null}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

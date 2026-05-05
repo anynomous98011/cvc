@@ -1,91 +1,83 @@
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { verifyPassword, createSessionDirect, SESSION_COOKIE_NAME } from '@/lib/auth-server';
-import { cookies } from 'next/headers';
-import crypto from 'crypto';
+import { verifyPassword, createSession } from '@/lib/auth-server';
+import { z } from 'zod';
+import { ensureAdminAccount } from '@/lib/admin';
+import { Prisma } from '@prisma/client';
 
-export async function POST(req: Request) {
+const loginSchema = z.object({
+  email: z.string().email('Invalid email').refine((email) => !email.includes('temp') && !email.endsWith('example.com'), 'Use real email'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+});
+
+export async function POST(request: NextRequest) {
   try {
-    const { email, password } = await req.json();
+    await ensureAdminAccount();
+    const body = await request.json();
+    const validated = loginSchema.parse(body);
 
-    // Validate input
-    if (!email || !password) {
-      return Response.json(
-        { error: 'Email and password are required' },
-        { status: 400 }
-      );
-    }
+    const user = await prisma.user.findUnique({
+      where: { email: validated.email },
+    });
 
-    // Find user with better error handling
-    let user;
-    try {
-      user = await prisma.user.findUnique({
-        where: { email },
-      });
-    } catch (dbError) {
-      console.error('Database error during login:', dbError);
-      throw dbError;
-    }
-
-    if (!user) {
-      return Response.json(
-        { error: 'Invalid email or password' },
+    if (!user || !await verifyPassword(validated.password, user.password)) {
+      return NextResponse.json(
+        { error: 'Invalid credentials' },
         { status: 401 }
       );
     }
 
-    // Verify password
-    let isPasswordValid;
-    try {
-      isPasswordValid = await verifyPassword(password, user.passwordHash);
-    } catch (passwordError) {
-      console.error('Password verification error:', passwordError);
-      throw passwordError;
-    }
-
-    if (!isPasswordValid) {
-      return Response.json(
-        { error: 'Invalid email or password' },
-        { status: 401 }
+    if (!user.isEmailVerified) {
+      return NextResponse.json(
+        { error: 'Email not verified' },
+        { status: 403 }
       );
     }
 
-    // Create session with crypto token generation
-    const token = crypto.randomBytes(32).toString('hex');
-    try {
-      await createSessionDirect(token, user.id);
-    } catch (sessionError) {
-      console.error('Session creation error:', sessionError);
-      throw sessionError;
-    }
+    const session = await createSession(user.id, request);
 
-    // Set cookie
-    const cookieStore = await cookies();
-    cookieStore.set(SESSION_COOKIE_NAME, token, {
+    const response = NextResponse.json({
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        hasFullAccess: user.hasFullAccess,
+      },
+    });
+
+    response.cookies.set('session-token', session.token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60, // 7 days
+      maxAge: 7 * 24 * 60 * 60,
       path: '/',
     });
 
-    return Response.json(
-      {
-        success: true,
-        user: {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-        },
-      },
-      { status: 200 }
-    );
+    return response;
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ error: error.errors[0].message }, { status: 400 });
+    }
+    if (error instanceof Prisma.PrismaClientInitializationError) {
+      return NextResponse.json(
+        { error: 'Database connection issue. Please check server configuration.' },
+        { status: 503 }
+      );
+    }
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2031') {
+      return NextResponse.json(
+        { error: 'MongoDB replica set required. Use Atlas URI or enable replica set locally.' },
+        { status: 503 }
+      );
+    }
+    if (error instanceof Prisma.PrismaClientUnknownRequestError && `${error.message}`.includes('authentication failed')) {
+      return NextResponse.json(
+        { error: 'Database authentication failed. Please verify MongoDB username/password in DATABASE_URL.' },
+        { status: 503 }
+      );
+    }
     console.error('Login error:', error);
-    // Return more detailed error for debugging
-    const errorMessage = error instanceof Error ? error.message : 'Internal server error';
-    return Response.json(
-      { error: 'Internal server error', details: errorMessage },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

@@ -4,16 +4,10 @@ import { hashPassword, verifyPassword, createSession, verifySession } from '@/li
 
 describe('Auth Flow', () => {
   const testUser = {
-    email: 'test@example.com',
+    email: `test-${Date.now()}@example.com`,
     password: 'test123',
     name: 'Test User'
   };
-
-  // Cleanup any existing test user
-  beforeAll(async () => {
-    await prisma.session.deleteMany({ where: { user: { email: testUser.email } } });
-    await prisma.user.deleteMany({ where: { email: testUser.email } });
-  });
 
   afterAll(async () => {
     await prisma.session.deleteMany({ where: { user: { email: testUser.email } } });
@@ -36,7 +30,7 @@ describe('Auth Flow', () => {
     const user = await prisma.user.create({
       data: {
         email: testUser.email,
-        passwordHash: hash,
+        password: hash,
         name: testUser.name
       }
     });

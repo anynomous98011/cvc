@@ -1,10 +1,9 @@
 'use client';
-import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { discoverTrends, type DiscoverTrendsState } from '@/lib/actions';
-import { useActionState, useEffect, startTransition, useState } from 'react';
+import { useActionState, useEffect, startTransition } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -92,47 +91,10 @@ function TrendingResults({ state }: { state: DiscoverTrendsState }) {
   );
 }
 
-// Auth wrapper
-function AuthWrapper({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const res = await fetch('/api/auth/me');
-        const data = await res.json();
-
-        if (!data.authenticated) {
-          router.push('/login');
-        }
-      } catch (error) {
-        router.push('/login');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkAuth();
-  }, [router]);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <span>Loading...</span>
-      </div>
-    );
-  }
-
-  return <>{children}</>;
-}
 
 export default function TrendingPage() {
-  return (
-    <AuthWrapper>
-      <TrendingContent />
-    </AuthWrapper>
-  );
+  return <TrendingContent />;
 }
 
 function TrendingContent() {

@@ -1,6 +1,5 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -44,46 +43,31 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Loader2, Sparkles, Upload, FileText, Image as ImageIcon, Pilcrow, Hash, Search } from 'lucide-react';
+import {
+  Loader2,
+  Sparkles,
+  Upload,
+  FileText,
+  Image as ImageIcon,
+  Pilcrow,
+  Hash,
+  Instagram,
+  Music2,
+  Youtube,
+  Twitter,
+  Facebook,
+} from 'lucide-react';
 import Image from 'next/image';
-import { Textarea } from '@/components/ui/textarea';
 
-const platforms = ['Instagram', 'TikTok', 'YouTube', 'Twitter', 'Facebook'];
+const platforms = [
+  { value: 'Instagram', icon: Instagram, label: 'Instagram' },
+  { value: 'TikTok', icon: Music2, label: 'TikTok' },
+  { value: 'YouTube', icon: Youtube, label: 'YouTube' },
+  { value: 'Twitter', icon: Twitter, label: 'Twitter' },
+  { value: 'Facebook', icon: Facebook, label: 'Facebook' },
+];
 
-// Add authentication check
-function AuthWrapper({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const res = await fetch('/api/auth/me');
-        const data = await res.json();
-
-        if (!data.authenticated) {
-          router.push('/login');
-        }
-      } catch (error) {
-        router.push('/login');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkAuth();
-  }, [router]);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
-  }
-
-  return <>{children}</>;
-}
 const styles = ['Humorous', 'Educational', 'Inspirational', 'Vlog', 'Review'];
 
 // Schemas
@@ -234,11 +218,7 @@ function SeoResults({ state }: { state: AnalyzeSeoState }) {
 
 
 export default function CreatorStudioPage() {
-  return (
-    <AuthWrapper>
-      <CreatorStudioContent />
-    </AuthWrapper>
-  );
+  return <CreatorStudioContent />;
 }
 
 function CreatorStudioContent() {
@@ -345,7 +325,17 @@ function CreatorStudioContent() {
                                                 <Select onValueChange={field.onChange} defaultValue={field.value} name={field.name}>
                                                     <FormControl><SelectTrigger><SelectValue placeholder="Select a platform" /></SelectTrigger></FormControl>
                                                     <SelectContent>
-                                                        {platforms.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+                                                        {platforms.map((platform) => {
+                                                          const Icon = platform.icon;
+                                                          return (
+                                                            <SelectItem key={platform.value} value={platform.value}>
+                                                              <span className="inline-flex items-center gap-2">
+                                                                <Icon className="h-4 w-4" />
+                                                                <span>{platform.label}</span>
+                                                              </span>
+                                                            </SelectItem>
+                                                          );
+                                                        })}
                                                     </SelectContent>
                                                 </Select>
                                                 <FormMessage />

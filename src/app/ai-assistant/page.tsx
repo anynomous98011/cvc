@@ -1,5 +1,4 @@
 'use client';
-import { useRouter } from 'next/navigation';
 import { useForm, type UseFormReturn } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -24,41 +23,6 @@ import {
 } from '@/components/ui/select';
 import { Loader2, Sparkles, Bot } from 'lucide-react';
 
-// Auth check component
-function AuthWrapper({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const res = await fetch('/api/auth/me');
-        const data = await res.json();
-
-        if (!data.authenticated) {
-          router.push('/login');
-        }
-      } catch (error) {
-        router.push('/login');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkAuth();
-  }, [router]);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
-  }
-
-  return <>{children}</>;
-}
-
 const platforms = ['Instagram', 'TikTok', 'YouTube', 'Twitter', 'Facebook', 'Blog'];
 const styles = ['Humorous', 'Educational', 'Inspirational', 'Vlog', 'Review', 'News'];
 
@@ -77,11 +41,7 @@ interface Message {
 }
 
 export default function AiAssistantPage() {
-  return (
-    <AuthWrapper>
-      <AiAssistantContent />
-    </AuthWrapper>
-  );
+  return <AiAssistantContent />;
 }
 
 function AiAssistantContent() {

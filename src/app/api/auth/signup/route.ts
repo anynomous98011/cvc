@@ -1,120 +1,109 @@
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { hashPassword, createSessionDirect, SESSION_COOKIE_NAME } from '@/lib/auth-server';
-import { cookies } from 'next/headers';
-import crypto from 'crypto';
+import { hashPassword, createSession, logUserAction } from '@/lib/auth-server';
+import { z } from 'zod';
+import { Prisma } from '@prisma/client';
 
-export async function POST(req: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const { email, name, password, confirmPassword } = await req.json();
+    const body = await request.json();
+    
+    const signupSchema = z.object({
+      email: z.string().email('Invalid email').refine((email) => !email.includes('temp') && !email.endsWith('example.com'), 'Use real email'),
+      password: z.string().min(8, 'Password too short'),
+      name: z.string().min(2, 'Name required'),
+      phone: z.string().optional(),
+    });
 
-    // Validate input
-    if (!email || !name || !password || !confirmPassword) {
-      return Response.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      );
-    }
-
-    if (password !== confirmPassword) {
-      return Response.json(
-        { error: 'Passwords do not match' },
-        { status: 400 }
-      );
-    }
-
-    if (password.length < 6) {
-      return Response.json(
-        { error: 'Password must be at least 6 characters' },
-        { status: 400 }
-      );
-    }
+    const validated = signupSchema.parse(body);
 
     // Check if user already exists
-    let existingUser;
-    try {
-      existingUser = await prisma.user.findUnique({
-        where: { email },
-      });
-    } catch (dbError) {
-      console.error('Database error checking existing user:', dbError);
-      throw dbError;
-    }
+    const existingUser = await prisma.user.findUnique({
+      where: { email: validated.email }
+    });
 
     if (existingUser) {
-      return Response.json(
-        { error: 'Email already in use' },
-        { status: 409 }
+      return NextResponse.json(
+        { error: 'User already exists' },
+        { status: 400 }
       );
     }
 
     // Hash password
-    const passwordHash = await hashPassword(password);
+    const hashedPassword = await hashPassword(validated.password);
 
     // Create user
-    let user;
-    try {
-      user = await prisma.user.create({
-        data: {
-          email,
-          name,
-          passwordHash,
-        },
-      });
-    } catch (error: any) {
-      console.error('User creation error:', error);
-      if (error.code === 'P2002') {
-        return Response.json(
-          { error: 'Email already in use' },
-          { status: 409 }
-        );
-      }
-      throw error;
-    }
+    const user = await prisma.user.create({
+      data: {
+        email: validated.email,
+        password: hashedPassword,
+        name: validated.name,
+        phone: validated.phone || null,
+        createdVia: 'email',
+        role: 'USER',
+      },
+    });
 
-    // Create profile separately
-    try {
-      await prisma.profile.create({
-        data: {
-          userId: user.id,
-        },
-      });
-    } catch (profileError) {
-      // Profile creation failed, but user was created - continue
-      console.error('Profile creation error:', profileError);
-    }
+    // Create profile
+    await prisma.profile.create({
+      data: {
+        userId: user.id,
+      },
+    });
 
-    // Create session with crypto token generation
-    const token = crypto.randomBytes(32).toString('hex');
-    const { expiresAt } = await createSessionDirect(token, user.id);
+    // Log signup
+    await logUserAction(user.id, 'signup', request);
 
-    // Set cookie
-    const cookieStore = await cookies();
-    cookieStore.set(SESSION_COOKIE_NAME, token, {
+    // Create session
+    const session = await createSession(user.id, request);
+
+    // Set session cookie
+    const response = NextResponse.json({
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        hasFullAccess: user.hasFullAccess,
+      },
+    });
+
+    response.cookies.set('session-token', session.token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60, // 7 days
+      maxAge: 7 * 24 * 60 * 60,
       path: '/',
     });
 
-    return Response.json(
-      {
-        success: true,
-        user: {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-        },
-      },
-      { status: 201 }
-    );
+    return response;
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ error: error.errors[0].message }, { status: 400 });
+    }
+    if (error instanceof Prisma.PrismaClientInitializationError) {
+      return NextResponse.json(
+        { error: 'Database connection issue. Please check server configuration.' },
+        { status: 503 }
+      );
+    }
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2031') {
+      return NextResponse.json(
+        { error: 'MongoDB replica set required. Use Atlas URI or enable replica set locally.' },
+        { status: 503 }
+      );
+    }
+    if (error instanceof Prisma.PrismaClientUnknownRequestError && `${error.message}`.includes('authentication failed')) {
+      return NextResponse.json(
+        { error: 'Database authentication failed. Please verify MongoDB username/password in DATABASE_URL.' },
+        { status: 503 }
+      );
+    }
     console.error('Signup error:', error);
-    // Return more detailed error for debugging
-    const errorMessage = error instanceof Error ? error.message : 'Internal server error';
-    return Response.json(
-      { error: 'Internal server error', details: errorMessage },
+    return NextResponse.json(
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }
+
 }

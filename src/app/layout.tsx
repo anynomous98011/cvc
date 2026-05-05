@@ -6,6 +6,8 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { AppHeader } from '@/components/app-header';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Toaster } from '@/components/ui/toaster';
+import { SessionProvider } from '@/components/session-provider';
+import { ActivityTracker } from '@/components/activity-tracker';
 
 const fontInter = Inter({
   subsets: ['latin'],
@@ -36,21 +38,24 @@ export default function RootLayout({
           fontSpaceGrotesk.variable
         )}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="theme-neon-pink"
-          enableSystem
-          disableTransitionOnChange
-        >
-            <div className="relative flex min-h-screen flex-col">
-              <AppHeader />
-              <main className="flex-1">{children}</main>
-              <div className="fixed bottom-4 left-4 z-50">
-                <ThemeToggle />
+<SessionProvider>
+            <ActivityTracker />
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="theme-neon-pink"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <div className="relative flex min-h-screen flex-col">
+                <AppHeader />
+                <main className="flex-1">{children}</main>
+                <div className="fixed bottom-4 left-4 z-50">
+                  <ThemeToggle />
+                </div>
               </div>
-            </div>
-            <Toaster />
-        </ThemeProvider>
+              <Toaster />
+            </ThemeProvider>
+          </SessionProvider>
       </body>
     </html>
   );
