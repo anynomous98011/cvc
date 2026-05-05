@@ -2,13 +2,14 @@ import bcrypt from 'bcryptjs';
 import { randomBytes } from 'crypto';
 import { prisma } from './prisma';
 import type { NextRequest } from 'next/server';
-import UAParser from 'user-agents';
 
 function safeUserAgentFingerprint(uaStr: string): string {
+  if (!uaStr) return 'unknown_device';
   try {
-    const ua = new UAParser(uaStr);
-    const value = ua.toString().trim();
-    return value ? value.replace(/ /g, '_') : 'unknown_device';
+    const match = uaStr.match(/(Chrome|Firefox|Safari|Edge|MSIE|Trident|Opera|Brave)\/[\d.]+/i) || 
+                  uaStr.match(/(Mobile|Android|iPhone|iPad|Windows NT|Macintosh|Linux)/i);
+    const value = match ? match[0] : uaStr.substring(0, 30);
+    return value.replace(/[^a-zA-Z0-9-]/g, '_').substring(0, 50);
   } catch {
     return 'unknown_device';
   }

@@ -36,7 +36,7 @@ model User {
 model Session {
   id String @id @default(auto()) @map("_id") @db.ObjectId
   token String @unique
-  userId    String
+  userId    String @db.ObjectId
   expiresAt DateTime
   createdAt DateTime @default(now())
 
@@ -46,7 +46,7 @@ model Session {
 
 model Profile {
   id String @id @default(auto()) @map("_id") @db.ObjectId
-  userId String @unique
+  userId String @unique @db.ObjectId
   bio       String?
   avatar    String?
   createdAt DateTime @default(now())
@@ -75,7 +75,7 @@ model WorkerStatus {
 
 model UserLog {
   id String @id @default(auto()) @map("_id") @db.ObjectId
-  userId String
+  userId String @db.ObjectId
   action             String
   ip                 String?
   deviceFingerprint  String?
@@ -88,7 +88,7 @@ model UserLog {
 
 model PageActivity {
   id String @id @default(auto()) @map("_id") @db.ObjectId
-  userId String
+  userId String @db.ObjectId
   pagePath String
   durationMs Int
   createdAt DateTime @default(now())
