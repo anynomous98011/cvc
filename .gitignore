@@ -44,3 +44,8 @@ next-env.d.ts
 firebase-debug.log
 firestore-debug.log
 .vercel
+.env*.local
+
+# secrets and credentials
+google_client_id.txt
+google_client_secret.txt

@@ -4,6 +4,7 @@ import { verifyPassword, createSession } from '@/lib/auth-server';
 import { z } from 'zod';
 import { ensureAdminAccount } from '@/lib/admin';
 import { Prisma } from '@prisma/client';
+import { rateLimit } from '@/lib/rate-limit';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email').refine((email) => !email.includes('temp') && !email.endsWith('example.com'), 'Use real email'),
@@ -12,6 +13,15 @@ const loginSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+    const rate = await rateLimit(`login:${ip}`, 10, 60 * 1000);
+    if (!rate.success) {
+      return NextResponse.json(
+        { error: 'Too many login attempts. Please try again in a minute.' },
+        { status: 429 }
+      );
+    }
+
     await ensureAdminAccount();
     const body = await request.json();
     const validated = loginSchema.parse(body);
@@ -24,13 +34,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Invalid credentials' },
         { status: 401 }
-      );
-    }
-
-    if (!user.isEmailVerified) {
-      return NextResponse.json(
-        { error: 'Email not verified' },
-        { status: 403 }
       );
     }
 
@@ -71,13 +74,13 @@ export async function POST(request: NextRequest) {
         { status: 503 }
       );
     }
-    if (error instanceof Prisma.PrismaClientUnknownRequestError && `${error.message}`.includes('authentication failed')) {
+    if (error instanceof Prisma.PrismaClientUnknownRequestError && `${error.message}`.toLowerCase().includes('authentication failed')) {
       return NextResponse.json(
-        { error: 'Database authentication failed. Please verify MongoDB username/password in DATABASE_URL.' },
+        { error: 'Database authentication failed. Please verify your MongoDB username/password in Vercel Environment Variables (DATABASE_URL).' },
         { status: 503 }
       );
     }
     console.error('Login error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ error: `Internal server error: ${String(error)}` }, { status: 500 });
   }
 }

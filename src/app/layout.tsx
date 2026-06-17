@@ -20,8 +20,79 @@ const fontSpaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: 'Rachna Rivo',
-  description: 'AI-powered toolkit for social media content creators',
+  title: {
+    default: 'Rachna Rivo | AI-Powered Social Media Creator Studio',
+    template: '%s | Rachna Rivo',
+  },
+  description: 'Rachna Rivo is a comprehensive AI-powered toolkit for content creators to analyze SEO, discover viral trends, and generate engaging social media content.',
+  keywords: [
+    'content creation',
+    'AI writer',
+    'SEO analyzer',
+    'viral trends',
+    'social media tool',
+    'Rachna Rivo',
+    'creator studio',
+    'AI assistant'
+  ],
+  authors: [{ name: 'Rachna Rivo Team' }],
+  creator: 'Rachna Rivo',
+  metadataBase: new URL('http://localhost:3000'),
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'http://localhost:3000',
+    title: 'Rachna Rivo | AI-Powered Social Media Creator Studio',
+    description: 'Optimize and create viral social media content with AI. Discover trends, analyze SEO, and automate content writing.',
+    siteName: 'Rachna Rivo',
+    images: [
+      {
+        url: '/image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Rachna Rivo AI Creator Studio',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Rachna Rivo | AI-Powered Social Media Creator Studio',
+    description: 'Optimize and create viral social media content with AI.',
+    images: ['/image.png'],
+    creator: '@rachnarivo',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+};
+
+const websiteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'Rachna Rivo',
+  url: 'http://localhost:3000',
+};
+
+const softwareApplicationSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: 'Rachna Rivo',
+  operatingSystem: 'All',
+  applicationCategory: 'BusinessApplication',
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'USD',
+  },
+  description: 'AI-powered toolkit for social media content creators to discover trends, analyze SEO, and generate viral content.',
 };
 
 export default function RootLayout({
@@ -31,6 +102,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareApplicationSchema) }}
+        />
+      </head>
       <body
         className={cn(
           'min-h-screen bg-background font-sans antialiased',

@@ -1,3 +1,10 @@
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Privacy Policy & Data Security | Rachna Rivo',
+  description: 'Understand how Rachna Rivo securely processes your login credentials, registration details, and tracking logs using encrypted session tokens and hashed storage.',
+};
+
 export default function PrivacyPolicyPage() {
   return (
     <div className="container mx-auto max-w-4xl px-4 py-10">

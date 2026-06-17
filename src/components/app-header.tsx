@@ -5,9 +5,11 @@ import { cn } from '@/lib/utils';
 import { useEffect, useState } from 'react';
 import { Button } from './ui/button';
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
-import { Menu } from 'lucide-react';
+import { Menu, LogOut, ShieldAlert, LogIn } from 'lucide-react';
 import Image from 'next/image';
 import { ThemeToggle } from './theme-toggle';
+import { useSession } from '@/components/session-provider';
+import { useRouter } from 'next/navigation';
 
 const navItems = [
   { label: 'Home', href: '/' },
@@ -21,6 +23,14 @@ export function AppHeader() {
   const pathname = usePathname();
   const [isMounted, setIsMounted] = useState(false);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const { user, refreshSession } = useSession();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await fetch('/api/auth/logout', { method: 'POST' });
+    await refreshSession();
+    router.push('/login');
+  };
 
   useEffect(() => {
     setIsMounted(true);
@@ -35,19 +45,18 @@ export function AppHeader() {
       <div className="container flex h-16 items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center space-x-2 group">
-          <Image
-            src="/image.png"
-            alt="Logo"
-            width={32}
-            height={32}
-            className="transition-all duration-300 group-hover:rotate-[15deg] group-hover:scale-110"
-          />
+          <div className="bg-white rounded-lg p-1 flex items-center justify-center w-8 h-8 shadow-sm border border-zinc-200">
+            <img
+              src="/image.png"
+              alt="Logo"
+              className="w-full h-full object-contain transition-all duration-300 group-hover:rotate-[15deg] group-hover:scale-110"
+            />
+          </div>
           <span className="font-bold text-lg bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-500 to-pink-500 group-hover:opacity-90 transition-opacity">
             Rachna
           </span>
         </Link>
 
-        {/* Desktop Nav */}
         <nav className="hidden items-center gap-8 text-sm font-medium md:flex ml-12">
             {navItems.map((item) => (
                 <Link
@@ -67,6 +76,32 @@ export function AppHeader() {
         </nav>
 
         <div className="flex flex-1 items-center justify-end gap-2">
+          {/* Desktop Auth */}
+          <div className="hidden md:flex items-center gap-2 mr-2">
+            {user ? (
+              <>
+                {user.role === 'ADMIN' && (
+                  <Button variant="ghost" size="sm" asChild className="gap-2 text-rose-500 hover:text-rose-400 hover:bg-rose-500/10">
+                    <Link href="/admin">
+                      <ShieldAlert className="h-4 w-4" />
+                      Admin
+                    </Link>
+                  </Button>
+                )}
+                <Button variant="ghost" size="sm" onClick={handleLogout} className="gap-2">
+                  <LogOut className="h-4 w-4" />
+                  Log out
+                </Button>
+              </>
+            ) : (
+              <Button variant="default" size="sm" asChild className="gap-2">
+                <Link href="/login">
+                  <LogIn className="h-4 w-4" />
+                  Log in
+                </Link>
+              </Button>
+            )}
+          </div>
           {/* Mobile Nav */}
           <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
             <SheetTrigger asChild>
@@ -77,12 +112,13 @@ export function AppHeader() {
             </SheetTrigger>
             <SheetContent side="left">
                 <Link href="/" className="flex items-center mb-8">
-                    <Image
+                  <div className="bg-white rounded-lg p-1 flex items-center justify-center w-8 h-8 shadow-sm border border-zinc-200">
+                    <img
                       src="/image.png"
                       alt="Logo"
-                      width={32}
-                      height={32}
+                      className="w-full h-full object-contain"
                     />
+                  </div>
                 </Link>
                 <nav className="flex flex-col gap-6 text-lg font-medium">
                     {navItems.map((item) => (
@@ -99,6 +135,26 @@ export function AppHeader() {
                             {item.label}
                         </Link>
                     ))}
+                    <div className="h-px bg-border my-2" />
+                    {user ? (
+                      <>
+                        {user.role === 'ADMIN' && (
+                          <Link href="/admin" className="transition-colors text-rose-500 hover:text-rose-400 flex items-center gap-2">
+                            <ShieldAlert className="h-5 w-5" />
+                            Admin Panel
+                          </Link>
+                        )}
+                        <button onClick={handleLogout} className="transition-colors text-foreground/60 hover:text-foreground text-left flex items-center gap-2">
+                          <LogOut className="h-5 w-5" />
+                          Log out
+                        </button>
+                      </>
+                    ) : (
+                      <Link href="/login" className="transition-colors text-foreground/60 hover:text-foreground flex items-center gap-2">
+                        <LogIn className="h-5 w-5" />
+                        Log in
+                      </Link>
+                    )}
                 </nav>
             </SheetContent>
           </Sheet>

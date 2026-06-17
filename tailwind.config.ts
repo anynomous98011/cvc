@@ -91,6 +91,10 @@ const config = {
             transform: 'translateY(0)',
           },
         },
+        'fall': {
+          '0%': { transform: 'translateY(-10vh) rotate(0deg)' },
+          '100%': { transform: 'translateY(110vh) rotate(360deg)' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
@@ -98,6 +102,7 @@ const config = {
         'subtle-shine': 'subtle-shine 5s linear infinite',
         'background-pan': 'background-pan 10s linear infinite',
         'fade-in-up': 'fade-in-up 0.5s ease-out',
+        'fall': 'fall linear infinite',
       },
     },
   },

@@ -3,9 +3,19 @@ import { prisma } from '@/lib/prisma';
 import { hashPassword, createSession, logUserAction } from '@/lib/auth-server';
 import { z } from 'zod';
 import { Prisma } from '@prisma/client';
+import { rateLimit } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+    const rate = await rateLimit(`signup:${ip}`, 5, 60 * 1000);
+    if (!rate.success) {
+      return NextResponse.json(
+        { error: 'Too many signup attempts. Please try again in a minute.' },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
     
     const signupSchema = z.object({
@@ -101,7 +111,7 @@ export async function POST(request: NextRequest) {
     }
     console.error('Signup error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: `Internal server error: ${String(error)}` },
       { status: 500 }
     );
   }

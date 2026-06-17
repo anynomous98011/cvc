@@ -1,0 +1,37 @@
+# Allow all standard search engine crawlers
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /creator-studio/
+Disallow: /seo-analyzer/
+Disallow: /ai-assistant/
+Disallow: /scraped-items/
+
+# Allow OpenAI's user-agent (ChatGPT)
+User-agent: ChatGPT-User
+Allow: /
+Disallow: /api/
+
+# Allow OpenAI's web crawler (GPTBot)
+User-agent: GPTBot
+Allow: /
+Disallow: /api/
+
+# Allow Anthropic's crawler (ClaudeBot)
+User-agent: ClaudeBot
+Allow: /
+Disallow: /api/
+
+# Allow Google AI scraper (Google-Extended)
+User-agent: Google-Extended
+Allow: /
+Disallow: /api/
+
+# Allow Perplexity's crawler (PerplexityBot)
+User-agent: PerplexityBot
+Allow: /
+Disallow: /api/
+
+# Link to sitemap
+Sitemap: http://localhost:9002/sitemap.xml

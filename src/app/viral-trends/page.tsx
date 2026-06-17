@@ -1,179 +1,59 @@
-'use client';
-import { useState, useEffect, Suspense } from 'react';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { getViralTrends } from '@/lib/actions';
-import { FileText, Lightbulb, TrendingUp, CheckCircle, Loader2 } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
-import { GetViralTrendsState } from '@/lib/actions';
+import type { Metadata } from 'next';
+import ViralTrendsClient from './viral-trends-client';
 
-function ViralTrendsContent() {
-  const [trendsState, setTrendsState] = useState<GetViralTrendsState>({status: 'idle'});
+export const metadata: Metadata = {
+  title: 'Viral Social Media Titles & Hook Templates | Rachna Rivo',
+  description: 'Analyze viral title formats, hook designs, description templates, and actionable content suggestions to boost your performance on YouTube, Instagram, and TikTok.',
+  keywords: [
+    'viral titles',
+    'hook templates',
+    'video titles',
+    'social media descriptions',
+    'video click-through rate',
+    'rachna rivo'
+  ],
+  alternates: {
+    canonical: 'http://localhost:3000/viral-trends',
+  },
+};
 
-  useEffect(() => {
-    async function fetchTrends() {
-      const trends = await getViralTrends();
-      setTrendsState(trends);
+const viralFaqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How does Rachna Rivo help write viral titles?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Rachna Rivo uses AI models to analyze past viral headline formulas and suggests structured title formats (e.g. comparison hooks, curiosity hooks) you can instantly adapt."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What strategies are recommended for high description engagement?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "We recommend placing a strong primary hook in the first 2 lines, followed by structured timeline links, helpful resource resources, and relevant keywords to rank on search indexes."
+      }
     }
-    fetchTrends();
-  }, []);
-
-  if (trendsState.status === 'idle' || trendsState.status === 'pending') {
-     return <ViralTrendsSkeleton />;
-  }
-
-  if (trendsState.status === 'error') {
-    return (
-      <div className="flex flex-col gap-6">
-        <Card className="col-span-full">
-          <CardHeader>
-            <CardTitle className="text-destructive">Error</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>Could not load viral trends. The AI model may be overloaded. Please try again in a few moments.</p>
-            <p className="text-sm text-muted-foreground mt-2">{trendsState.error}</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  const { trendingTopics, viralTitleExamples, viralDescriptionExamples, suggestions } = trendsState.data!;
-
-  return (
-    <div className="flex flex-col gap-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="font-headline flex items-center gap-2">
-            <TrendingUp />
-            Trending Topics
-          </CardTitle>
-          <CardDescription>
-            These topics are gaining traction right now.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ul className="list-inside list-disc space-y-2">
-            {trendingTopics.map((item, index) => (
-              <li key={index}>{item}</li>
-            ))}
-          </ul>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle className="font-headline flex items-center gap-2">
-            <FileText />
-            Viral Title Examples
-          </CardTitle>
-          <CardDescription>
-            Use these formats as inspiration for your next title.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ul className="list-inside list-disc space-y-2">
-            {viralTitleExamples.map((item, index) => (
-              <li key={index}><span className="font-bold">{item.split(':')[0]}:</span>{item.substring(item.indexOf(':') + 1)}</li>
-            ))}
-          </ul>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle className="font-headline flex items-center gap-2">
-            <Lightbulb />
-            Viral Description Examples
-          </CardTitle>
-           <CardDescription>
-            Structure your descriptions like this to increase engagement.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ul className="list-inside list-disc space-y-2">
-            {viralDescriptionExamples.map((item, index) => (
-              <li key={index}>{item}</li>
-            ))}
-          </ul>
-        </CardContent>
-      </Card>
-       <Card>
-        <CardHeader>
-          <CardTitle className="font-headline flex items-center gap-2">
-            <CheckCircle />
-            Actionable Suggestions
-          </CardTitle>
-           <CardDescription>
-            Follow these strategies to boost your chances of going viral.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ul className="list-inside list-disc space-y-2">
-            {suggestions.map((item, index) => (
-              <li key={index}>{item}</li>
-            ))}
-          </ul>
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
-
-
-function ViralTrendsSkeleton() {
-    return (
-        <div className="flex flex-col gap-6">
-            <Card>
-                <CardHeader><Skeleton className="h-8 w-1/2" /></CardHeader>
-                <CardContent className="space-y-2">
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-4/5" />
-                    <Skeleton className="h-4 w-full" />
-                </CardContent>
-            </Card>
-            <Card>
-                <CardHeader><Skeleton className="h-8 w-1/2" /></CardHeader>
-                <CardContent className="space-y-2">
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-4/5" />
-                    <Skeleton className="h-4 w-full" />
-                </CardContent>
-            </Card>
-            <Card>
-                <CardHeader><Skeleton className="h-8 w-1/2" /></CardHeader>
-                <CardContent className="space-y-2">
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-4/5" />
-                    <Skeleton className="h-4 w-full" />
-                </CardContent>
-            </Card>
-            <Card>
-                 <CardHeader><Skeleton className="h-8 w-1/2" /></CardHeader>
-                <CardContent className="space-y-2">
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-4/5" />
-                    <Skeleton className="h-4 w-full" />
-                </CardContent>
-            </Card>
-        </div>
-    )
-}
+  ]
+};
 
 export default function ViralTrendsPage() {
-  return <ViralTrendsContent />;
-}
-
-function ViralTrendsDisplay() {
   return (
-    <div className="space-y-6">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold">Trending Content Analysis</h2>
-        <p className="text-gray-500">Loading viral content trends...</p>
+    <div className="container mx-auto max-w-4xl p-4 md:p-8">
+      <div className="text-center mb-8">
+        <h1 className="mb-4 font-headline text-4xl font-bold">Viral Content Trends</h1>
+        <p className="text-muted-foreground">
+          Analyze viral formats, structures, and ideas generated by AI based on high-performing content.
+        </p>
       </div>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(viralFaqSchema) }}
+      />
+      <ViralTrendsClient />
     </div>
   );
 }

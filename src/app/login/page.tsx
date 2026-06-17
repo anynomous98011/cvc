@@ -10,6 +10,8 @@ import { Loader2, Mail, Lock, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useToast } from '@/hooks/use-toast';
 import { useSession } from '@/components/session-provider';
+import Image from 'next/image';
+import Link from 'next/link';
 
 export default function LoginPage() {
   return (
@@ -23,7 +25,6 @@ function LoginPageContent() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [particles, setParticles] = useState<number[]>([]);
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
@@ -34,12 +35,6 @@ function LoginPageContent() {
       router.push(searchParams.get('redirect') || '/');
     }
   }, [user, router, searchParams]);
-
-  useEffect(() => {
-    // Generate particles for animation
-    const newParticles = Array.from({ length: 50 }, () => Math.random() * 100);
-    setParticles(newParticles);
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,160 +78,155 @@ function LoginPageContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-900 to-indigo-900 relative overflow-hidden">
-      {/* Animated Particles */}
-      <AnimatePresence>
-        {particles.map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-2 h-2 bg-white/20 rounded-full"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-            }}
-            animate={{
-              scale: [1, 1.5, 1],
-              opacity: [0.5, 1, 0.5],
-              y: [0, -20, 0],
-            }}
-            transition={{
-              duration: 3,
-              repeat: Infinity,
-              delay: i * 0.1,
-            }}
-          />
-        ))}
-      </AnimatePresence>
+    <div className="min-h-screen bg-black relative flex items-center justify-center overflow-hidden">
+      {/* Dynamic Animated Background */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-purple-600/30 rounded-full blur-[120px] mix-blend-screen animate-pulse" />
+        <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-pink-600/20 rounded-full blur-[150px] mix-blend-screen animate-pulse" style={{ animationDelay: '2s' }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-indigo-900/20 rounded-full blur-[100px] mix-blend-screen" />
+      </div>
 
-      <div className="absolute inset-0 bg-black/20" />
+      {/* Grid Pattern Overlay */}
+      <div className="absolute inset-0 z-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)]" />
 
       <motion.div
-        initial={{ opacity: 0, y: 50 }}
+        initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        className="container mx-auto px-4 py-24 h-screen flex items-center justify-center"
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        className="w-full max-w-[420px] px-4 z-10"
       >
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ type: "spring", stiffness: 200, damping: 20 }}
-        >
-          <Card className="w-[400px] bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl">
-            <CardHeader className="text-center space-y-2">
-              <motion.div
-                animate={{ rotate: [0, 5, -5, 0] }}
-                transition={{ duration: 3, repeat: Infinity }}
-              >
-                <div className="w-20 h-20 bg-gradient-to-r from-pink-400 to-purple-500 rounded-2xl mx-auto flex items-center justify-center shadow-lg">
-                  <Lock className="w-10 h-10 text-white" />
-                </div>
-              </motion.div>
-              <CardTitle className="text-3xl bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent">
-                Welcome Back
+        <Card className="bg-black/40 backdrop-blur-2xl border-white/10 shadow-[0_0_40px_rgba(168,85,247,0.15)] relative overflow-hidden group">
+          {/* Subtle hover border glow */}
+          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br from-purple-500/10 via-transparent to-pink-500/10 pointer-events-none" />
+          
+          <CardHeader className="text-center space-y-4 pb-6 pt-8">
+            <motion.div
+              whileHover={{ scale: 1.05, rotate: 5 }}
+              transition={{ type: "spring", stiffness: 400, damping: 10 }}
+              className="w-20 h-20 bg-white rounded-2xl mx-auto flex items-center justify-center shadow-2xl p-4 border border-zinc-200 relative overflow-hidden"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-zinc-100 to-transparent" />
+              <img src="/image.png" alt="Logo" className="w-full h-full object-contain relative z-10" />
+            </motion.div>
+            
+            <div className="space-y-2">
+              <CardTitle className="text-3xl font-bold tracking-tight text-white">
+                Welcome back
               </CardTitle>
-              <CardDescription className="text-gray-300">
-                Sign in to your account to continue to Rachna Rivo
+              <CardDescription className="text-zinc-400 text-sm">
+                Enter your details to access your account
               </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="text-white">
-                    Email
-                  </Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="your@email.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="pl-10 bg-white/10 border-white/20 text-white placeholder-gray-400"
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password" className="text-white">
-                    Password
-                  </Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="pl-10 bg-white/10 border-white/20 text-white placeholder-gray-400"
-                    />
-                  </div>
-                </div>
-                <Button type="submit" className="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white shadow-lg" disabled={loading}>
-                  {loading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Signing in...
-                    </>
-                  ) : (
-                    <>
-                      Sign In <ArrowRight className="ml-2 h-4 w-4" />
-                    </>
-                  )}
-                </Button>
-              </form>
-
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-white/10" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-gradient-to-r from-purple-900 px-2 text-muted-foreground">
-                    Or continue with
-                  </span>
+            </div>
+          </CardHeader>
+          
+          <CardContent className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-zinc-300 text-xs uppercase tracking-wider font-semibold">
+                  Email
+                </Label>
+                <div className="relative group/input">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 w-4 h-4 transition-colors group-focus-within/input:text-purple-400" />
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="name@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="pl-10 bg-white/5 border-white/10 text-white placeholder-zinc-500 focus-visible:ring-purple-500/50 focus-visible:border-purple-500/50 transition-all h-11"
+                    required
+                  />
                 </div>
               </div>
-
+              
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password" className="text-zinc-300 text-xs uppercase tracking-wider font-semibold">
+                    Password
+                  </Label>
+                  <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); router.push('/forgot-password'); }} className="text-xs text-purple-400 hover:text-purple-300 transition-colors font-medium relative z-20 px-2 py-1 -mr-2">
+                    Forgot password?
+                  </button>
+                </div>
+                <div className="relative group/input">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 w-4 h-4 transition-colors group-focus-within/input:text-purple-400" />
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="pl-10 bg-white/5 border-white/10 text-white placeholder-zinc-500 focus-visible:ring-purple-500/50 focus-visible:border-purple-500/50 transition-all h-11"
+                    required
+                  />
+                </div>
+              </div>
+              
               <Button 
-                type="button"
-                variant="outline"
-                className="w-full border-white/20 bg-white/5 text-white hover:bg-white/10"
-                onClick={handleGoogleLogin}
+                type="submit" 
+                className="w-full h-11 bg-white text-black hover:bg-zinc-200 transition-colors font-medium relative overflow-hidden group/btn" 
+                disabled={loading}
               >
-                <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
-                  <path
-                    fill="currentColor"
-                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                  />
-                  <path
-                    fill="currentColor"
-                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23.99-3.71.99-2.85 0-5.27-1.93-6.13-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                  />
-                  <path
-                    fill="currentColor"
-                    d="M5.88 14.29c-.28-.78-.43-1.57-.43-2.39s.15-1.61.43-2.39l-0.01-.03L2.18 7.07C1.36 8.5 1 10.09 1 11.75s.36 3.25 1.18 4.68l3.7-2.84z"
-                  />
-                  <path
-                    fill="currentColor"
-                    d="M12 5.44c1.48 0 2.8.51 3.85 1.38L17.96 4c-1.82-1.67-4.3-2.69-7.05-2.69-2.3 0-4.45.74-6.18 2.02l3.7 2.84c.86-.91 1.95-1.44 3.23-1.44z"
-                  />
-                </svg>
-                Continue with Google
+                {loading ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <span className="flex items-center gap-2">
+                    Sign In
+                    <ArrowRight className="h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
+                  </span>
+                )}
               </Button>
+            </form>
 
-              <p className="text-center text-sm text-gray-400">
-                Don&apos;t have an account?{' '}
-                <a href="/signup" className="text-pink-400 hover:text-pink-300 font-medium">
-                  Sign up
-                </a>
-              </p>
-              <p className="text-center text-xs text-gray-400">
-                By continuing, you agree to our <a href="/privacy-policy" className="underline">Privacy Policy</a>.
-              </p>
-            </CardContent>
-          </Card>
-        </motion.div>
+            <div className="relative my-4">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-white/10" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-black px-2 text-zinc-500">Or continue with</span>
+              </div>
+            </div>
+
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleGoogleLogin}
+              className="w-full h-11 bg-white/5 hover:bg-white/10 text-white border-white/10 transition-all font-medium flex items-center justify-center gap-2 group/google"
+            >
+              <svg className="w-5 h-5 transition-transform group-hover/google:scale-110" viewBox="0 0 24 24">
+                <path
+                  fill="currentColor"
+                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                  className="fill-[#4285F4]"
+                />
+                <path
+                  fill="currentColor"
+                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                  className="fill-[#34A853]"
+                />
+                <path
+                  fill="currentColor"
+                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                  className="fill-[#FBBC05]"
+                />
+                <path
+                  fill="currentColor"
+                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                  className="fill-[#EA4335]"
+                />
+              </svg>
+              Continue with Google
+            </Button>
+
+            <p className="text-center text-sm text-zinc-400 mt-6">
+              Don&apos;t have an account?{' '}
+              <Link href="/signup" className="text-white hover:underline font-medium transition-colors">
+                Sign up
+              </Link>
+            </p>
+          </CardContent>
+        </Card>
       </motion.div>
     </div>
   );
 }
-

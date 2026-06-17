@@ -21,9 +21,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Loader2, Sparkles, Bot } from 'lucide-react';
+import { Loader2, Sparkles, Bot, Instagram, Music2, Youtube, Twitter, Facebook, Rss } from 'lucide-react';
 
-const platforms = ['Instagram', 'TikTok', 'YouTube', 'Twitter', 'Facebook', 'Blog'];
+const platforms = [
+  { value: 'Instagram', icon: Instagram, label: 'Instagram' },
+  { value: 'TikTok', icon: Music2, label: 'TikTok' },
+  { value: 'YouTube', icon: Youtube, label: 'YouTube' },
+  { value: 'Twitter', icon: Twitter, label: 'Twitter' },
+  { value: 'Facebook', icon: Facebook, label: 'Facebook' },
+  { value: 'Blog', icon: Rss, label: 'Blog' },
+];
 const styles = ['Humorous', 'Educational', 'Inspirational', 'Vlog', 'Review', 'News'];
 
 const assistantSchema = z.object({
@@ -182,7 +189,17 @@ function AiAssistantContent() {
                                         </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                        {platforms.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+                                        {platforms.map((platform) => {
+                                          const Icon = platform.icon;
+                                          return (
+                                            <SelectItem key={platform.value} value={platform.value}>
+                                              <span className="inline-flex items-center gap-2">
+                                                <Icon className="h-4 w-4" />
+                                                <span>{platform.label}</span>
+                                              </span>
+                                            </SelectItem>
+                                          );
+                                        })}
                                         </SelectContent>
                                     </Select>
                                     <FormMessage />

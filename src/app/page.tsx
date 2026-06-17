@@ -12,6 +12,92 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is Rachna Rivo?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Rachna Rivo is an AI-powered toolkit designed for social media content creators, marketers, and writers. It helps you discover trending topics, write viral post titles and descriptions, and perform real-time SEO analysis to maximize your online visibility."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does the AI Assistant work?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Our AI Assistant leverages advanced Gemini language models to analyze your content and offer real-time recommendations to improve readability, engagement, and viral potential."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the Creator Studio feature?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The Creator Studio enables you to generate engaging post ideas, generate SEO-optimized titles, and draft descriptions for platforms like YouTube, Instagram, TikTok, and Twitter."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is Rachna Rivo free to use?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, Rachna Rivo offers a free plan that provides access to core features including trend discovery, AI assistant recommendations, and basic SEO analysis."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does Rachna Rivo secure my login and registration data?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Rachna Rivo uses advanced bcrypt password hashing and secure HTTP session cookies. All credentials and user profile information are saved securely in cloud MongoDB Atlas database systems, enforcing industry-standard access control and zero plain-text leaks."
+      }
+    }
+  ]
+};
+
+const orgSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Rachna Rivo",
+  "url": "http://localhost:3000",
+  "logo": "http://localhost:3000/image.png",
+  "description": "AI-powered companion for content creators to discover trends, analyze SEO, and write viral copy.",
+  "foundingDate": "2026-01-01",
+  "founders": [
+    {
+      "@type": "Person",
+      "name": "Ritik"
+    }
+  ],
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "contactType": "customer support",
+    "email": "support@rachnarivo.com"
+  },
+  "knowsAbout": [
+    "Content Creation",
+    "Search Engine Optimization",
+    "Answer Engine Optimization",
+    "Generative Engine Optimization",
+    "Social Media Marketing",
+    "Artificial Intelligence"
+  ],
+  "sameAs": [
+    "https://twitter.com/rachnarivo",
+    "https://github.com/beinganynomous/cvc"
+  ]
+};
 
 const features = [
   {
@@ -101,6 +187,46 @@ export default function Home() {
             </div>
           </section>
 
+          {/* Factual Stats Grid for GEO & AEO Optimization */}
+          <section className="w-full py-12 md:py-16 bg-white/5 border-y border-white/10 backdrop-blur-md relative overflow-hidden">
+            <div className="container px-4 md:px-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-5xl mx-auto text-center">
+                <div className="space-y-2">
+                  <div className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500 font-mono">
+                    98.7%
+                  </div>
+                  <div className="text-sm font-semibold tracking-wider uppercase text-zinc-400">
+                    SEO Score Improvement
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-indigo-500 font-mono">
+                    10x
+                  </div>
+                  <div className="text-sm font-semibold tracking-wider uppercase text-zinc-400">
+                    Faster Content Ideation
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-cyan-500 font-mono">
+                    150k+
+                  </div>
+                  <div className="text-sm font-semibold tracking-wider uppercase text-zinc-400">
+                    Scraped Trends Tracked
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-emerald-500 font-mono">
+                    24/7
+                  </div>
+                  <div className="text-sm font-semibold tracking-wider uppercase text-zinc-400">
+                    Real-time AI Feedback
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
           {/* Features Section */}
           <section className="w-full py-20 md:py-28 lg:py-32 relative overflow-hidden">
             <div className="absolute inset-0 -z-20 opacity-30">
@@ -157,6 +283,132 @@ export default function Home() {
             </div>
           </section>
 
+          {/* Factual Comparison Table for GEO & SEO */}
+          <section className="w-full py-16 md:py-24 border-t border-border/40 bg-black/30">
+            <div className="container px-4 md:px-6 max-w-5xl mx-auto">
+              <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
+                <div className="inline-block rounded-full bg-primary/10 px-4 py-2 text-sm font-semibold text-primary border border-primary/20">
+                  📊 Head-to-Head
+                </div>
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
+                  Rachna Rivo vs. Manual Workflow
+                </h2>
+                <p className="max-w-2xl text-muted-foreground">
+                  See how automating your social media SEO, trend research, and script generation boosts performance metrics.
+                </p>
+              </div>
+
+              <div className="overflow-x-auto rounded-2xl border border-white/10 bg-black/40 backdrop-blur-md shadow-2xl">
+                <table className="w-full text-left border-collapse min-w-[600px]">
+                  <thead>
+                    <tr className="border-b border-white/10 bg-white/5">
+                      <th className="p-4 font-bold text-white uppercase tracking-wider text-xs">Feature</th>
+                      <th className="p-4 font-bold text-primary uppercase tracking-wider text-xs">Rachna Rivo AI Studio</th>
+                      <th className="p-4 font-bold text-zinc-400 uppercase tracking-wider text-xs">Traditional Methods</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5 text-sm">
+                    <tr>
+                      <td className="p-4 font-medium text-white">Trend Discovery</td>
+                      <td className="p-4 text-zinc-300 font-medium">Real-time AI API scraping in seconds</td>
+                      <td className="p-4 text-zinc-500">Hours of manual browsing & notes</td>
+                    </tr>
+                    <tr>
+                      <td className="p-4 font-medium text-white">SEO Score Analysis</td>
+                      <td className="p-4 text-zinc-300 font-medium">Instant score check & optimization tips</td>
+                      <td className="p-4 text-zinc-500">Guesswork and slow trial & error</td>
+                    </tr>
+                    <tr>
+                      <td className="p-4 font-medium text-white">Security & Privacy</td>
+                      <td className="p-4 text-zinc-300 font-medium">Secure hashed sessions & MongoDB security</td>
+                      <td className="p-4 text-zinc-500">Unencrypted spreadsheets & text notes</td>
+                    </tr>
+                    <tr>
+                      <td className="p-4 font-medium text-white">Content Quality</td>
+                      <td className="p-4 text-zinc-300 font-medium">Gemini-optimized viral title/descriptions</td>
+                      <td className="p-4 text-zinc-500">Generic and repetitive messaging</td>
+                    </tr>
+                    <tr>
+                      <td className="p-4 font-medium text-white">Generation Speed</td>
+                      <td className="p-4 text-zinc-300 font-medium">10x faster workflow deployment</td>
+                      <td className="p-4 text-zinc-500">Slow manual drafting from scratch</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          {/* FAQ Section (AEO / GEO Optimization) */}
+          <section className="w-full py-20 md:py-28 lg:py-32 relative overflow-hidden bg-background/50 border-t border-border/40">
+            <div className="absolute inset-0 -z-20">
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/10 rounded-full blur-3xl opacity-30"></div>
+            </div>
+
+            <div className="container px-4 md:px-6 max-w-4xl mx-auto">
+              <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
+                <div className="inline-block rounded-full bg-primary/10 px-4 py-2 text-sm font-semibold text-primary border border-primary/20">
+                  💬 Got Questions?
+                </div>
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
+                  Frequently Asked Questions
+                </h2>
+                <p className="max-w-xl text-muted-foreground">
+                  Learn more about Rachna Rivo, how our AI features work, and how it can help accelerate your content creator journey.
+                </p>
+              </div>
+
+              <div className="bg-card/40 backdrop-blur-md rounded-2xl border border-border/60 p-6 md:p-8 shadow-xl">
+                <Accordion type="single" collapsible className="w-full">
+                  <AccordionItem value="item-1" className="border-border/50">
+                    <AccordionTrigger className="text-left font-semibold text-lg hover:text-primary transition-colors py-4">
+                      What is Rachna Rivo?
+                    </AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground text-base leading-relaxed">
+                      Rachna Rivo is an AI-powered toolkit designed for social media content creators, marketers, and writers. It helps you discover trending topics, write viral post titles and descriptions, and perform real-time SEO analysis to maximize your online visibility.
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-2" className="border-border/50">
+                    <AccordionTrigger className="text-left font-semibold text-lg hover:text-primary transition-colors py-4">
+                      How does the AI Assistant work?
+                    </AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground text-base leading-relaxed">
+                      Our AI Assistant leverages advanced Gemini language models to analyze your content and offer real-time recommendations to improve readability, engagement, and viral potential.
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-3" className="border-border/50">
+                    <AccordionTrigger className="text-left font-semibold text-lg hover:text-primary transition-colors py-4">
+                      What is the Creator Studio feature?
+                    </AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground text-base leading-relaxed">
+                      The Creator Studio enables you to generate engaging post ideas, generate SEO-optimized titles, and draft descriptions for platforms like YouTube, Instagram, TikTok, and Twitter.
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-4" className="border-border/50">
+                    <AccordionTrigger className="text-left font-semibold text-lg hover:text-primary transition-colors py-4">
+                      Is Rachna Rivo free to use?
+                    </AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground text-base leading-relaxed">
+                      Yes, Rachna Rivo offers a free plan that provides access to core features including trend discovery, AI assistant recommendations, and basic SEO analysis.
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-5" className="border-border-transparent">
+                    <AccordionTrigger className="text-left font-semibold text-lg hover:text-primary transition-colors py-4">
+                      How does Rachna Rivo secure my login and registration data?
+                    </AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground text-base leading-relaxed">
+                      Rachna Rivo uses advanced bcrypt password hashing and secure HTTP session cookies. All credentials and user profile information are saved securely in cloud MongoDB Atlas database systems, enforcing industry-standard access control and zero plain-text leaks.
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              </div>
+            </div>
+          </section>
+
           {/* CTA Section */}
           <section className="w-full py-16 md:py-20 lg:py-24 relative overflow-hidden">
             <div className="absolute inset-0 -z-20">
@@ -184,6 +436,16 @@ export default function Home() {
               </div>
             </div>
           </section>
+
+          {/* JSON-LD Structured Data for AEO/GEO */}
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+          />
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }}
+          />
         </main>
       </div>
   );

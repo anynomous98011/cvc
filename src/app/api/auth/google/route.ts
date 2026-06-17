@@ -4,7 +4,8 @@ import { getGoogleOAuthClient, GOOGLE_SCOPES } from '@/lib/google-auth';
 
 export async function GET(request: NextRequest) {
   try {
-    const oauthClient = getGoogleOAuthClient();
+    const origin = request.nextUrl.origin;
+    const oauthClient = getGoogleOAuthClient(origin);
     const state = randomBytes(16).toString('hex');
     const redirectTarget = request.nextUrl.searchParams.get('redirect') || '/';
 

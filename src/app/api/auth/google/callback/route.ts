@@ -16,7 +16,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(new URL('/login?error=google_state_mismatch', request.url));
     }
 
-    const oauthClient = getGoogleOAuthClient();
+    const origin = request.nextUrl.origin;
+    const oauthClient = getGoogleOAuthClient(origin);
     const { tokens } = await oauthClient.getToken(code);
     oauthClient.setCredentials(tokens);
 
@@ -30,8 +31,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(new URL('/login?error=google_email_missing', request.url));
     }
 
+    const userEmail = data.email.toLowerCase();
+
     const existingByEmail = await prisma.user.findUnique({
-      where: { email: data.email.toLowerCase() },
+      where: { email: userEmail },
     });
 
     const user = existingByEmail
@@ -43,17 +46,26 @@ export async function GET(request: NextRequest) {
             createdVia: existingByEmail.createdVia || 'google',
           },
         })
-      : await prisma.user.create({
-          data: {
-            email: data.email.toLowerCase(),
-            password: await hashPassword(crypto.randomUUID()),
-            name: data.name || data.given_name || 'Google User',
-            googleId: data.id || null,
-            isEmailVerified: true,
-            createdVia: 'google',
-            role: 'USER',
-          },
-        });
+      : await (async () => {
+          const newUser = await prisma.user.create({
+            data: {
+              email: userEmail,
+              password: await hashPassword(crypto.randomUUID()),
+              name: data.name || data.given_name || 'Google User',
+              googleId: data.id || null,
+              isEmailVerified: true,
+              createdVia: 'google',
+              role: 'USER',
+            },
+          });
+          await prisma.profile.create({
+            data: {
+              userId: newUser.id,
+              avatar: data.picture || null,
+            },
+          });
+          return newUser;
+        })();
 
     const session = await createSession(user.id, request);
     const safeRedirect = redirectTarget.startsWith('/') ? redirectTarget : '/';
