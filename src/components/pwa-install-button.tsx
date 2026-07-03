@@ -11,6 +11,8 @@ import {
   Loader2,
   Smartphone,
   Monitor,
+  Compass,
+  Menu,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -20,14 +22,38 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
-type Platform = 'ios' | 'android' | 'desktop' | 'unknown';
+type Platform = 'ios' | 'android' | 'macos-safari' | 'desktop-chrome-edge' | 'desktop-firefox' | 'generic';
 
-function detectPlatform(): Platform {
-  if (typeof navigator === 'undefined') return 'unknown';
-  const ua = navigator.userAgent;
-  if (/iPad|iPhone|iPod/.test(ua) && !(window as any).MSStream) return 'ios';
-  if (/android/i.test(ua)) return 'android';
-  return 'desktop';
+function detectDetailedPlatform(): Platform {
+  if (typeof navigator === 'undefined') return 'generic';
+  const ua = navigator.userAgent.toLowerCase();
+  
+  // iOS
+  if (/ipad|iphone|ipod/.test(ua) && !(window as any).MSStream) {
+    return 'ios';
+  }
+  
+  // macOS Safari
+  if (ua.includes('safari') && ua.includes('macintosh') && !ua.includes('chrome') && !ua.includes('chromium')) {
+    return 'macos-safari';
+  }
+  
+  // Android
+  if (ua.includes('android')) {
+    return 'android';
+  }
+  
+  // Desktop Chrome / Edge / Opera / Brave
+  if (/chrome|chromium|crios|edge|edg/.test(ua)) {
+    return 'desktop-chrome-edge';
+  }
+  
+  // Desktop Firefox
+  if (ua.includes('firefox')) {
+    return 'desktop-firefox';
+  }
+  
+  return 'generic';
 }
 
 function isStandalone(): boolean {
@@ -38,8 +64,122 @@ function isStandalone(): boolean {
   );
 }
 
-/* ── iOS Guide Modal ── */
-function IosGuideModal({ onClose }: { onClose: () => void }) {
+/* ── Custom Instructions Guide Modal ── */
+function GuideModal({
+  platform,
+  onClose,
+}: {
+  platform: Platform;
+  onClose: () => void;
+}) {
+  let title = 'Install App';
+  let subtitle = 'Rachna Rivo';
+  let steps: Array<{ step: number; title: string; desc: string; icon: React.ReactNode }> = [];
+
+  if (platform === 'ios') {
+    title = 'Install on iOS';
+    subtitle = 'Rachna Rivo • iPhone / iPad';
+    steps = [
+      {
+        step: 1,
+        title: 'Tap the Share Button',
+        desc: 'Tap the share button in Safari\'s bottom toolbar.',
+        icon: <Share className="h-5 w-5 text-blue-400" />,
+      },
+      {
+        step: 2,
+        title: 'Add to Home Screen',
+        desc: 'Scroll down the share menu and select "Add to Home Screen".',
+        icon: <Plus className="h-5 w-5 text-pink-400" />,
+      },
+    ];
+  } else if (platform === 'macos-safari') {
+    title = 'Install on Mac Safari';
+    subtitle = 'Rachna Rivo • macOS';
+    steps = [
+      {
+        step: 1,
+        title: 'Tap the Share Button',
+        desc: 'Click the Share button in the Safari toolbar (or go to File menu).',
+        icon: <Share className="h-5 w-5 text-blue-400" />,
+      },
+      {
+        step: 2,
+        title: 'Add to Dock',
+        desc: 'Select "Add to Dock..." from the menu to save it as an app.',
+        icon: <Plus className="h-5 w-5 text-purple-400" />,
+      },
+    ];
+  } else if (platform === 'android') {
+    title = 'Install on Android';
+    subtitle = 'Rachna Rivo • Mobile App';
+    steps = [
+      {
+        step: 1,
+        title: 'Open Chrome Menu',
+        desc: 'Tap the three-dots menu icon (⋮) in the top-right corner of Chrome.',
+        icon: <Menu className="h-5 w-5 text-zinc-400" />,
+      },
+      {
+        step: 2,
+        title: 'Select Install / Add',
+        desc: 'Tap "Install app" or "Add to Home screen" to install.',
+        icon: <Download className="h-5 w-5 text-pink-400" />,
+      },
+    ];
+  } else if (platform === 'desktop-chrome-edge') {
+    title = 'Install PWA App';
+    subtitle = 'Rachna Rivo • Desktop';
+    steps = [
+      {
+        step: 1,
+        title: 'Find the Install Icon',
+        desc: 'Look at the right side of the address bar (URL bar) at the top of Chrome/Edge.',
+        icon: <Compass className="h-5 w-5 text-blue-400" />,
+      },
+      {
+        step: 2,
+        title: 'Click & Install',
+        desc: 'Click the computer screen icon with a down arrow (or 3-dots menu -> "Save and share" -> "Install page") and click Install.',
+        icon: <Download className="h-5 w-5 text-purple-400" />,
+      },
+    ];
+  } else if (platform === 'desktop-firefox') {
+    title = 'Install App';
+    subtitle = 'Rachna Rivo • Firefox';
+    steps = [
+      {
+        step: 1,
+        title: 'PWA Support in Firefox',
+        desc: 'Firefox desktop does not support PWA installation directly.',
+        icon: <X className="h-5 w-5 text-red-400" />,
+      },
+      {
+        step: 2,
+        title: 'Use Chrome or Edge',
+        desc: 'To install this application, please open the website in Chrome, Edge, or Brave and click Install.',
+        icon: <Compass className="h-5 w-5 text-green-400" />,
+      },
+    ];
+  } else {
+    title = 'Install App';
+    subtitle = 'Rachna Rivo • Web App';
+    steps = [
+      {
+        step: 1,
+        title: 'Open Browser Menu',
+        desc: 'Open your browser\'s settings or sharing menu (usually 3 dots or share arrow).',
+        icon: <Plus className="h-5 w-5 text-zinc-400" />,
+      },
+      {
+        step: 2,
+        title: 'Install / Add to Home Screen',
+        desc: 'Look for "Install", "Add to Dock", or "Add to Home Screen" option.',
+        icon: <Download className="h-5 w-5 text-pink-400" />,
+      },
+    ];
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -61,12 +201,12 @@ function IosGuideModal({ onClose }: { onClose: () => void }) {
         <div className="p-6 space-y-5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm border border-zinc-200 p-1.5">
+              <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm border border-zinc-200 p-1.5 flex-shrink-0">
                 <img src="/image.png" alt="App Icon" className="w-full h-full object-contain" />
               </div>
               <div>
-                <h3 className="font-bold text-white text-lg">Install App</h3>
-                <p className="text-xs text-zinc-400">Rachna Rivo • iPhone / iPad</p>
+                <h3 className="font-bold text-white text-lg">{title}</h3>
+                <p className="text-xs text-zinc-400">{subtitle}</p>
               </div>
             </div>
             <button onClick={onClose} className="text-zinc-500 hover:text-zinc-300 p-1">
@@ -75,37 +215,25 @@ function IosGuideModal({ onClose }: { onClose: () => void }) {
           </div>
 
           <div className="space-y-3">
-            <div className="flex items-start gap-3 bg-white/5 rounded-xl p-3">
-              <div className="w-8 h-8 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center flex-shrink-0">
-                <span className="text-purple-400 font-bold text-sm">1</span>
-              </div>
-              <div>
-                <p className="text-sm text-zinc-200">Tap the <strong className="text-white">Share</strong> button</p>
-                <div className="flex items-center gap-1 mt-1">
-                  <Share className="h-4 w-4 text-blue-400" />
-                  <span className="text-xs text-zinc-500">in Safari's bottom toolbar</span>
+            {steps.map((s) => (
+              <div key={s.step} className="flex items-start gap-3 bg-white/5 rounded-xl p-3">
+                <div className="w-8 h-8 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center flex-shrink-0">
+                  <span className="text-purple-400 font-bold text-sm">{s.step}</span>
                 </div>
-              </div>
-            </div>
-            <div className="flex items-start gap-3 bg-white/5 rounded-xl p-3">
-              <div className="w-8 h-8 rounded-full bg-pink-500/20 border border-pink-500/30 flex items-center justify-center flex-shrink-0">
-                <span className="text-pink-400 font-bold text-sm">2</span>
-              </div>
-              <div>
-                <p className="text-sm text-zinc-200">Tap <strong className="text-white">"Add to Home Screen"</strong></p>
-                <div className="flex items-center gap-1 mt-1">
-                  <div className="w-4 h-4 rounded border border-zinc-400 flex items-center justify-center">
-                    <Plus className="h-2.5 w-2.5 text-zinc-400" />
+                <div>
+                  <p className="text-sm font-semibold text-zinc-200">{s.title}</p>
+                  <p className="text-xs text-zinc-400 mt-0.5">{s.desc}</p>
+                  <div className="flex items-center gap-1 mt-1.5">
+                    {s.icon}
                   </div>
-                  <span className="text-xs text-zinc-500">then tap Add</span>
                 </div>
               </div>
-            </div>
+            ))}
           </div>
 
-          <p className="text-xs text-zinc-500 text-center">The app icon will appear on your Home Screen ✨</p>
+          <p className="text-xs text-zinc-500 text-center">Open this app directly from your screen anytime! ✨</p>
           <Button onClick={onClose} className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white border-0">
-            Got it!
+            Close
           </Button>
         </div>
       </motion.div>
@@ -146,7 +274,7 @@ function NativeInstallModal({
         <div className="p-6 space-y-5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center shadow-lg border border-zinc-200 p-2">
+              <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center shadow-lg border border-zinc-200 p-2 flex-shrink-0">
                 <img src="/image.png" alt="App Icon" className="w-full h-full object-contain" />
               </div>
               <div>
@@ -204,7 +332,7 @@ function NativeInstallModal({
 /* ── Main exported component ── */
 export function InstallPwaButton({ variant = 'header' }: { variant?: 'header' | 'mobile' }) {
   const [prompt, setPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [platform, setPlatform] = useState<Platform>('unknown');
+  const [platform, setPlatform] = useState<Platform>('generic');
   const [showModal, setShowModal] = useState(false);
   const [isInstalling, setIsInstalling] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
@@ -212,7 +340,7 @@ export function InstallPwaButton({ variant = 'header' }: { variant?: 'header' | 
 
   useEffect(() => {
     setIsMounted(true);
-    setPlatform(detectPlatform());
+    setPlatform(detectDetailedPlatform());
 
     // Already running as installed PWA
     if (isStandalone() || (window as any).__pwaInstalled) {
@@ -225,7 +353,7 @@ export function InstallPwaButton({ variant = 'header' }: { variant?: 'header' | 
       setPrompt((window as any).__pwaInstallPrompt);
     }
 
-    // Listen for prompt captured after mount (rare, but handle it)
+    // Listen for prompt captured after mount
     const onPromptReady = () => {
       if ((window as any).__pwaInstallPrompt) {
         setPrompt((window as any).__pwaInstallPrompt);
@@ -261,7 +389,6 @@ export function InstallPwaButton({ variant = 'header' }: { variant?: 'header' | 
       console.error('Install failed:', err);
     } finally {
       setIsInstalling(false);
-      // prompt can only be used once
       (window as any).__pwaInstallPrompt = null;
       setPrompt(null);
     }
@@ -271,25 +398,23 @@ export function InstallPwaButton({ variant = 'header' }: { variant?: 'header' | 
   if (!isMounted) return null;
   if (isStandalone()) return null;
 
-  // Only show if:
-  // - iOS: always (they use the Share sheet guide)
-  // - Other: only if the native install prompt is available
-  const canShowNative = platform !== 'ios' && prompt !== null;
-  const canShowIos = platform === 'ios';
-  if (!canShowNative && !canShowIos && !isInstalled) return null;
-
+  // We ALWAYS show the button as long as it's not already installed,
+  // providing a great entry point for users on any browser/device.
   const openModal = () => setShowModal(true);
   const closeModal = () => setShowModal(false);
 
   const modal = showModal ? (
-    platform === 'ios' ? (
-      <IosGuideModal onClose={closeModal} />
-    ) : (
+    prompt ? (
       <NativeInstallModal
         platform={platform}
         onInstall={handleInstall}
         onClose={closeModal}
         isInstalling={isInstalling}
+      />
+    ) : (
+      <GuideModal
+        platform={platform}
+        onClose={closeModal}
       />
     )
   ) : null;
