@@ -34,4 +34,4 @@ Allow: /
 Disallow: /api/
 
 # Link to sitemap
-Sitemap: http://localhost:9002/sitemap.xml
+Sitemap: https://cvc-amber.vercel.app/sitemap.xml

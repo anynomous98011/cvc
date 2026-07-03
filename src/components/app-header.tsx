@@ -54,7 +54,7 @@ export function AppHeader() {
             />
           </div>
           <span className="font-bold text-lg bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-500 to-pink-500 group-hover:opacity-90 transition-opacity">
-            Rachna
+            Rachna Rivo
           </span>
         </Link>
 
@@ -116,7 +116,7 @@ export function AppHeader() {
               </Button>
             </SheetTrigger>
             <SheetContent side="left">
-                <Link href="/" className="flex items-center mb-8">
+                <Link href="/" className="flex items-center space-x-2 mb-8 group">
                   <div className="bg-white rounded-lg p-1 flex items-center justify-center w-8 h-8 shadow-sm border border-zinc-200">
                     <img
                       src="/image.png"
@@ -124,6 +124,9 @@ export function AppHeader() {
                       className="w-full h-full object-contain"
                     />
                   </div>
+                  <span className="font-bold text-lg bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-500 to-pink-500">
+                    Rachna Rivo
+                  </span>
                 </Link>
                 <nav className="flex flex-col gap-6 text-lg font-medium">
                     {navItems.map((item) => (

@@ -70,8 +70,8 @@ const orgSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
   "name": "Rachna Rivo",
-  "url": "http://localhost:3000",
-  "logo": "http://localhost:3000/image.png",
+  "url": "https://cvc-amber.vercel.app",
+  "logo": "https://cvc-amber.vercel.app/image.png",
   "description": "AI-powered companion for content creators to discover trends, analyze SEO, and write viral copy.",
   "foundingDate": "2026-01-01",
   "founders": [
