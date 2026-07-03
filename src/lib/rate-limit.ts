@@ -56,12 +56,13 @@ export async function rateLimit(
       reset: entry.expireAt,
     };
   } catch (error) {
-    console.error('Rate limiting error:', error);
-    // Fail-safe: allow requests to go through if database rate-limiting fails
+    // SECURITY: Fail CLOSED — if the rate-limit database is unavailable,
+    // deny the request rather than allowing unlimited through.
+    console.error('Rate limiting error (failing closed):', error);
     return {
-      success: true,
+      success: false,
       limit,
-      remaining: limit,
+      remaining: 0,
       reset: new Date(now.getTime() + windowMs),
     };
   }

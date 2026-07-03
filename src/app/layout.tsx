@@ -8,6 +8,7 @@ import { ThemeToggle } from '@/components/theme-toggle';
 import { Toaster } from '@/components/ui/toaster';
 import { SessionProvider } from '@/components/session-provider';
 import { ActivityTracker } from '@/components/activity-tracker';
+import { PwaRegister } from '@/components/pwa-register';
 
 const fontInter = Inter({
   subsets: ['latin'],
@@ -25,6 +26,15 @@ export const metadata: Metadata = {
     template: '%s | Rachna Rivo',
   },
   description: 'Rachna Rivo is a comprehensive AI-powered toolkit for content creators to analyze SEO, discover viral trends, and generate engaging social media content.',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Rachna Rivo',
+  },
+  formatDetection: {
+    telephone: false,
+  },
   keywords: [
     'content creation',
     'AI writer',
@@ -37,11 +47,11 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: 'Rachna Rivo Team' }],
   creator: 'Rachna Rivo',
-  metadataBase: new URL('http://localhost:3000'),
+  metadataBase: new URL('https://cvc-amber.vercel.app'),
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'http://localhost:3000',
+    url: 'https://cvc-amber.vercel.app',
     title: 'Rachna Rivo | AI-Powered Social Media Creator Studio',
     description: 'Optimize and create viral social media content with AI. Discover trends, analyze SEO, and automate content writing.',
     siteName: 'Rachna Rivo',
@@ -78,7 +88,7 @@ const websiteSchema = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
   name: 'Rachna Rivo',
-  url: 'http://localhost:3000',
+  url: 'https://cvc-amber.vercel.app',
 };
 
 const softwareApplicationSchema = {
@@ -111,6 +121,17 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareApplicationSchema) }}
         />
+        {/* PWA – Apple / iOS */}
+        <link rel="apple-touch-icon" href="/icon-192x192.png" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="Rachna Rivo" />
+        {/* Viewport fill for iOS notch */}
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        {/* PWA – Windows / Edge */}
+        <meta name="msapplication-TileColor" content="#ec4899" />
+        <meta name="msapplication-TileImage" content="/icon-192x192.png" />
+        <meta name="theme-color" content="#ec4899" />
       </head>
       <body
         className={cn(
@@ -119,8 +140,9 @@ export default function RootLayout({
           fontSpaceGrotesk.variable
         )}
       >
-<SessionProvider>
-            <ActivityTracker />
+        <SessionProvider>
+          <PwaRegister />
+          <ActivityTracker />
             <ThemeProvider
               attribute="class"
               defaultTheme="theme-neon-pink"

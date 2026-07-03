@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { Button } from './ui/button';
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
 import { Menu, LogOut, ShieldAlert, LogIn } from 'lucide-react';
+import { InstallPwaButton } from '@/components/pwa-install-button';
 import Image from 'next/image';
 import { ThemeToggle } from './theme-toggle';
 import { useSession } from '@/components/session-provider';
@@ -76,6 +77,10 @@ export function AppHeader() {
         </nav>
 
         <div className="flex flex-1 items-center justify-end gap-2">
+          {/* PWA Install button - desktop */}
+          <div className="hidden md:block">
+            <InstallPwaButton variant="header" />
+          </div>
           {/* Desktop Auth */}
           <div className="hidden md:flex items-center gap-2 mr-2">
             {user ? (
@@ -135,6 +140,9 @@ export function AppHeader() {
                             {item.label}
                         </Link>
                     ))}
+                    <div className="h-px bg-border my-2" />
+                    {/* PWA Install - mobile */}
+                    <InstallPwaButton variant="mobile" />
                     <div className="h-px bg-border my-2" />
                     {user ? (
                       <>

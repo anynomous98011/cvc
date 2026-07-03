@@ -36,6 +36,40 @@ function LoginPageContent() {
     }
   }, [user, router, searchParams]);
 
+  useEffect(() => {
+    const error = searchParams.get('error');
+    if (error) {
+      let title = "Authentication Error";
+      let description = "An error occurred during authentication.";
+
+      if (error === 'google_not_configured') {
+        title = "Google OAuth Not Configured";
+        description = "Google sign-in is not configured for this domain. Please register your domain in the Google Cloud Console.";
+      } else if (error === 'google_state_mismatch') {
+        title = "Security Verification Failed";
+        description = "OAuth state mismatch. Please try signing in again.";
+      } else if (error === 'google_email_missing') {
+        title = "Email Access Required";
+        description = "Could not retrieve email address from your Google account.";
+      } else if (error === 'google_callback_failed') {
+        title = "Google Sign-In Failed";
+        description = "Failed to complete authentication with Google. Please check your Google OAuth credentials.";
+      }
+
+      toast({
+        title,
+        description,
+        variant: "destructive",
+      });
+
+      // Clear the error parameter from the URL
+      const newParams = new URLSearchParams(searchParams.toString());
+      newParams.delete('error');
+      const query = newParams.toString();
+      router.replace(`/login${query ? `?${query}` : ''}`);
+    }
+  }, [searchParams, toast, router]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);

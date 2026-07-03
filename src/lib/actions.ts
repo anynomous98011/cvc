@@ -33,6 +33,8 @@ import {
   ViralTrendsOutput,
 } from '@/ai/flows/get-viral-trends';
 
+import { sanitizeAiInput, MAX_CONTENT_LEN } from '@/lib/security';
+
 type ActionState<T> = {
   status: 'idle' | 'success' | 'error' | 'pending';
   data?: T;
@@ -53,8 +55,11 @@ function handleAIError(e: any): { status: 'error'; error: string } {
   if (e instanceof Error) {
     if (e.message.includes('503 Service Unavailable') || e.message.includes('model is overloaded')) {
       errorMessage = 'The AI model is currently overloaded. Please try again in a few moments.';
+    } else if (e.message.includes('disallowed template syntax')) {
+      errorMessage = 'Input contains disallowed characters. Please revise your input.';
     } else {
-      errorMessage = e.message;
+      // SECURITY: Only expose sanitized, generic error messages
+      errorMessage = 'AI processing failed. Please try again.';
     }
   }
   return { status: 'error', error: errorMessage };
@@ -64,16 +69,17 @@ export async function generateContent(
   prevState: GenerateContentState,
   formData: FormData
 ): Promise<GenerateContentState> {
-  const input: GenerateViralContentInput = {
-      topic: formData.get('topic') as string,
-      platform: formData.get('platform') as string,
-      style: formData.get('style') as string,
-  };
   try {
-      const result = await generateViralContent(input);
-      return { status: 'success', data: result };
+    // SECURITY: Sanitize all user inputs to block SSTI template injection
+    const input: GenerateViralContentInput = {
+        topic: sanitizeAiInput(formData.get('topic')),
+        platform: sanitizeAiInput(formData.get('platform'), 50),
+        style: sanitizeAiInput(formData.get('style'), 50),
+    };
+    const result = await generateViralContent(input);
+    return { status: 'success', data: result };
   } catch (e: any) {
-      return handleAIError(e);
+    return handleAIError(e);
   }
 }
 
@@ -100,48 +106,49 @@ export async function analyzeSeo(
   prevState: AnalyzeSeoState,
   formData: FormData
 ): Promise<AnalyzeSeoState> {
+  try {
     const input: AnalyzeSeoAndProvideRecommendationsInput = {
-        textContent: formData.get('textContent') as string,
-        targetKeywords: formData.get('targetKeywords') as string,
+      textContent: sanitizeAiInput(formData.get('textContent'), MAX_CONTENT_LEN),
+      targetKeywords: sanitizeAiInput(formData.get('targetKeywords'), 500),
     };
-    try {
-        const result = await analyzeSeoAndProvideRecommendations(input);
-        return { status: 'success', data: result };
-    } catch (e: any) {
-        return handleAIError(e);
-    }
+    const result = await analyzeSeoAndProvideRecommendations(input);
+    return { status: 'success', data: result };
+  } catch (e: any) {
+    return handleAIError(e);
+  }
 }
 
 export async function getImprovements(
   prevState: GetImprovementsState,
   formData: FormData,
 ): Promise<GetImprovementsState> {
+  try {
     const input: ContentIdeaImprovementsInput = {
-        topic: formData.get('topic') as string,
-        platform: formData.get('platform') as string,
-        style: formData.get('style') as string,
+      topic: sanitizeAiInput(formData.get('topic')),
+      platform: sanitizeAiInput(formData.get('platform'), 50),
+      style: sanitizeAiInput(formData.get('style'), 50),
     };
-    try {
-        const result = await getContentIdeaImprovements(input);
-        return { status: 'success', data: result };
-    } catch (e: any) {
-        return handleAIError(e);
-    }
+    const result = await getContentIdeaImprovements(input);
+    return { status: 'success', data: result };
+  } catch (e: any) {
+    return handleAIError(e);
+  }
 }
 
 export async function discoverTrends(
   prevState: DiscoverTrendsState,
   formData: FormData,
 ): Promise<DiscoverTrendsState> {
-    const input: TrendingContentInput = {
-        topic: (formData.get('topic') as string) || undefined,
-        platform: formData.get('platform') as string,
-    };
   try {
-      const result = await discoverTrendingContent(input);
-      return { status: 'success', data: result };
+    const rawTopic = formData.get('topic');
+    const input: TrendingContentInput = {
+      topic: rawTopic ? sanitizeAiInput(rawTopic) : undefined,
+      platform: sanitizeAiInput(formData.get('platform'), 50),
+    };
+    const result = await discoverTrendingContent(input);
+    return { status: 'success', data: result };
   } catch (e: any) {
-        return handleAIError(e);
+    return handleAIError(e);
   }
 }
 

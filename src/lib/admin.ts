@@ -2,15 +2,20 @@ import { prisma } from '@/lib/prisma';
 import { getServerSession } from '@/lib/session';
 import { hashPassword, verifyPassword } from '@/lib/auth-server';
 
-const DEFAULT_ADMIN_EMAIL = 'beinganynomous@gmail.com';
-const DEFAULT_ADMIN_PASSWORD = '9801121599@ritik';
-
+/**
+ * SECURITY: Admin credentials must come ONLY from environment variables.
+ * Never hardcode credentials in source code.
+ */
 export function getAdminEmail(): string {
-  return process.env.ADMIN_EMAIL || DEFAULT_ADMIN_EMAIL;
+  const email = process.env.ADMIN_EMAIL;
+  if (!email) throw new Error('ADMIN_EMAIL environment variable is required.');
+  return email;
 }
 
 export function getAdminPassword(): string {
-  return process.env.ADMIN_PASSWORD || DEFAULT_ADMIN_PASSWORD;
+  const password = process.env.ADMIN_PASSWORD;
+  if (!password) throw new Error('ADMIN_PASSWORD environment variable is required.');
+  return password;
 }
 
 export async function ensureAdminAccount(): Promise<void> {

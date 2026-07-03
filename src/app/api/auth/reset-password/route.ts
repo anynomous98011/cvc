@@ -2,10 +2,18 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { hashPassword } from '@/lib/auth-server';
 import { rateLimit } from '@/lib/rate-limit';
+import { isValidOrigin } from '@/lib/security';
 
 export async function POST(request: NextRequest) {
   try {
-    const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+    // SECURITY: CSRF origin check
+    if (!isValidOrigin(request)) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0].trim()
+      || request.headers.get('x-real-ip')
+      || 'unknown';
     const rate = await rateLimit(`reset-password:${ip}`, 3, 60 * 1000);
     if (!rate.success) {
       return NextResponse.json(
@@ -20,8 +28,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Token and password are required' }, { status: 400 });
     }
 
-    if (password.length < 8) {
-      return NextResponse.json({ error: 'Password must be at least 8 characters' }, { status: 400 });
+    // SECURITY: Enforce strict token format — must be exactly 64 hex chars.
+    // This prevents replay of malformed tokens and probing DB with arbitrary strings.
+    if (!/^[a-f0-9]{64}$/.test(String(token))) {
+      return NextResponse.json({ error: 'Invalid or expired token' }, { status: 400 });
+    }
+
+    // SECURITY: Password length bounds (min 8, max 72 to avoid bcrypt DoS)
+    if (typeof password !== 'string' || password.length < 8 || password.length > 72) {
+      return NextResponse.json({ error: 'Password must be 8–72 characters' }, { status: 400 });
     }
 
     const resetToken = await prisma.passwordResetToken.findUnique({

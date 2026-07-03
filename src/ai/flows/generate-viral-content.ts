@@ -42,6 +42,7 @@ Platform: {{{platform}}}
 Style: {{{style}}}
 
 Generate a list of viral titles, SEO descriptions, hashtags, thumbnail ideas, and AI image prompts. Return results as a JSON object.
+IMPORTANT: For hashtags, return ONLY the word without the '#' symbol (e.g., "fitness" not "#fitness"). The '#' will be added automatically in the UI.
 `,
 });
 

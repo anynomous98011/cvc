@@ -4,10 +4,18 @@ import { hashPassword, createSession, logUserAction } from '@/lib/auth-server';
 import { z } from 'zod';
 import { Prisma } from '@prisma/client';
 import { rateLimit } from '@/lib/rate-limit';
+import { isValidOrigin } from '@/lib/security';
 
 export async function POST(request: NextRequest) {
   try {
-    const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+    // SECURITY: CSRF origin check
+    if (!isValidOrigin(request)) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0].trim()
+      || request.headers.get('x-real-ip')
+      || 'unknown';
     const rate = await rateLimit(`signup:${ip}`, 5, 60 * 1000);
     if (!rate.success) {
       return NextResponse.json(
@@ -17,12 +25,13 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    
+
     const signupSchema = z.object({
-      email: z.string().email('Invalid email').refine((email) => !email.includes('temp') && !email.endsWith('example.com'), 'Use real email'),
-      password: z.string().min(8, 'Password too short'),
-      name: z.string().min(2, 'Name required'),
-      phone: z.string().optional(),
+      email: z.string().email('Invalid email').max(254).refine((email) => !email.includes('temp') && !email.endsWith('example.com'), 'Use real email'),
+      // SECURITY: max 72 chars to prevent bcrypt DoS (bcrypt silently truncates beyond 72)
+      password: z.string().min(8, 'Password too short').max(72, 'Password too long'),
+      name: z.string().min(2, 'Name required').max(100),
+      phone: z.string().max(20).optional(),
     });
 
     const validated = signupSchema.parse(body);
@@ -109,9 +118,10 @@ export async function POST(request: NextRequest) {
         { status: 503 }
       );
     }
-    console.error('Signup error:', error);
+    console.error('[auth/signup]', error);
+    // SECURITY: Never leak internal error details to the client
     return NextResponse.json(
-      { error: `Internal server error: ${String(error)}` },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }

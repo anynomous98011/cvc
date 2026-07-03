@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { ensureAdminAccount } from '@/lib/admin';
 import { Prisma } from '@prisma/client';
 import { rateLimit } from '@/lib/rate-limit';
+import { isValidOrigin } from '@/lib/security';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email').refine((email) => !email.includes('temp') && !email.endsWith('example.com'), 'Use real email'),
@@ -13,7 +14,14 @@ const loginSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
-    const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+    // SECURITY: CSRF origin check
+    if (!isValidOrigin(request)) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0].trim()
+      || request.headers.get('x-real-ip')
+      || 'unknown';
     const rate = await rateLimit(`login:${ip}`, 10, 60 * 1000);
     if (!rate.success) {
       return NextResponse.json(
@@ -80,7 +88,8 @@ export async function POST(request: NextRequest) {
         { status: 503 }
       );
     }
-    console.error('Login error:', error);
-    return NextResponse.json({ error: `Internal server error: ${String(error)}` }, { status: 500 });
+    console.error('[auth/login]', error);
+    // SECURITY: Never leak internal error details to the client
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

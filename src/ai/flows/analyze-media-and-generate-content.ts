@@ -79,7 +79,7 @@ const analyzeMediaAndGenerateContentPrompt = ai.definePrompt({
   Your response should contain the following parts:
   - title: A concise and engaging title for the content.
   - description: An SEO-optimized description of the content.
-  - hashtags: A list of relevant hashtags.`,
+  - hashtags: A list of relevant hashtags. IMPORTANT: Return ONLY the word without the '#' symbol (e.g., "fitness" not "#fitness"). The '#' will be added automatically in the UI.`,
 });
 
 const analyzeMediaAndGenerateContentFlow = ai.defineFlow(

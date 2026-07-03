@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -56,6 +56,8 @@ import {
   Youtube,
   Twitter,
   Facebook,
+  Copy,
+  Check,
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -86,36 +88,191 @@ const seoSchema = z.object({
   targetKeywords: z.string().min(3, 'Keywords must be at least 3 characters'),
 });
 
+// Helper: strip leading '#' to prevent ##doublehashtag
+function stripHash(tag: string): string {
+  return tag.replace(/^#+/, '');
+}
+
+// Copy button with checkmark feedback
+function CopyButton({ text, className = '' }: { text: string; className?: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // fallback for older browsers
+      const el = document.createElement('textarea');
+      el.value = text;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  }, [text]);
+
+  return (
+    <button
+      onClick={handleCopy}
+      title="Copy to clipboard"
+      className={`inline-flex items-center gap-1 rounded px-2 py-1 text-xs text-muted-foreground hover:text-foreground hover:bg-muted transition-colors ${className}`}
+    >
+      {copied ? (
+        <><Check className="h-3 w-3 text-green-500" /><span className="text-green-500">Copied!</span></>
+      ) : (
+        <><Copy className="h-3 w-3" /><span>Copy</span></>
+      )}
+    </button>
+  );
+}
+
+// Copy All button for an entire section
+function CopyAllButton({ items, label = 'Copy All' }: { items: string[]; label?: string }) {
+  const text = items.join('\n');
+  return (
+    <CopyButton text={text} className="ml-auto text-xs font-medium border border-border px-3 py-1 rounded-md" />
+  );
+}
 
 // Result Display Components
 function ContentResults({ state }: { state: GenerateContentState }) {
   if (!state.data) return null;
   const { viralTitles, seoDescriptions, hashtags, thumbnailIdeas, aiImagePrompts } = state.data;
+
+  // Sanitize hashtags - strip any leading # the AI might have included
+  const cleanHashtags = hashtags.map(stripHash);
+
   return (
     <div className="mt-8 space-y-6">
-       <div className="grid gap-6 md:grid-cols-2">
-          <Card>
-            <CardHeader><CardTitle className="font-headline flex items-center gap-2"><Pilcrow /> Viral Titles</CardTitle></CardHeader>
-            <CardContent><ul className="list-inside list-disc space-y-2">{viralTitles.map((item, index) => <li key={index}>{item}</li>)}</ul></CardContent>
-          </Card>
-          <Card>
-            <CardHeader><CardTitle className="font-headline flex items-center gap-2"><FileText /> SEO Descriptions</CardTitle></CardHeader>
-            <CardContent><ul className="list-inside list-disc space-y-2">{seoDescriptions.map((item, index) => <li key={index}>{item}</li>)}</ul></CardContent>
-          </Card>
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* Viral Titles */}
+        <Card>
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <CardTitle className="font-headline flex items-center gap-2"><Pilcrow /> Viral Titles</CardTitle>
+              <CopyAllButton items={viralTitles} label="Copy All Titles" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-2">
+              {viralTitles.map((item, index) => (
+                <li key={index} className="flex items-start justify-between gap-2 group">
+                  <span className="flex-1 list-item list-disc ml-4">{item}</span>
+                  <CopyButton text={item} />
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+
+        {/* SEO Descriptions */}
+        <Card>
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <CardTitle className="font-headline flex items-center gap-2"><FileText /> SEO Descriptions</CardTitle>
+              <CopyAllButton items={seoDescriptions} label="Copy All Descriptions" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-2">
+              {seoDescriptions.map((item, index) => (
+                <li key={index} className="flex items-start justify-between gap-2 group">
+                  <span className="flex-1 list-item list-disc ml-4">{item}</span>
+                  <CopyButton text={item} />
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
       </div>
-       <div className="grid gap-6 md:grid-cols-3">
-          <Card>
-            <CardHeader><CardTitle className="font-headline flex items-center gap-2"><Hash /> Hashtags</CardTitle></CardHeader>
-            <CardContent><div className="flex flex-wrap gap-2">{hashtags.map((item) => <span key={item} className="rounded-full bg-secondary px-3 py-1 text-sm">#{item}</span>)}</div></CardContent>
-          </Card>
-          <Card>
-            <CardHeader><CardTitle className="font-headline flex items-center gap-2"><ImageIcon /> Thumbnail Ideas</CardTitle></CardHeader>
-            <CardContent><ul className="list-inside list-disc space-y-2">{thumbnailIdeas.map((item, index) => <li key={index}>{item}</li>)}</ul></CardContent>
-          </Card>
-          <Card>
-            <CardHeader><CardTitle className="font-headline flex items-center gap-2"><Sparkles /> AI Image Prompts</CardTitle></CardHeader>
-            <CardContent><ul className="list-inside list-disc space-y-2">{aiImagePrompts.map((item, index) => <li key={index}>{item}</li>)}</ul></CardContent>
-          </Card>
+
+      <div className="grid gap-6 md:grid-cols-3">
+        {/* Hashtags */}
+        <Card>
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <CardTitle className="font-headline flex items-center gap-2"><Hash /> Hashtags</CardTitle>
+              <CopyAllButton items={cleanHashtags.map(t => `#${t}`)} label="Copy All Hashtags" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              {cleanHashtags.map((item) => (
+                <div key={item} className="flex items-center gap-1">
+                  <span className="rounded-full bg-secondary px-3 py-1 text-sm">#{item}</span>
+                  <CopyButton text={`#${item}`} />
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Thumbnail Ideas */}
+        <Card>
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <CardTitle className="font-headline flex items-center gap-2"><ImageIcon /> Thumbnail Ideas</CardTitle>
+              <CopyAllButton items={thumbnailIdeas} label="Copy All Ideas" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-2">
+              {thumbnailIdeas.map((item, index) => (
+                <li key={index} className="flex items-start justify-between gap-2 group">
+                  <span className="flex-1 list-item list-disc ml-4">{item}</span>
+                  <CopyButton text={item} />
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+
+        {/* AI Image Prompts */}
+        <Card>
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <CardTitle className="font-headline flex items-center gap-2"><Sparkles /> AI Image Prompts</CardTitle>
+              <CopyAllButton items={aiImagePrompts} label="Copy All Prompts" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-2">
+              {aiImagePrompts.map((item, index) => (
+                <li key={index} className="flex items-start justify-between gap-2 group">
+                  <span className="flex-1 list-item list-disc ml-4">{item}</span>
+                  <CopyButton text={item} />
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Copy Everything */}
+      <div className="flex justify-end">
+        <CopyButton
+          text={[
+            '=== VIRAL TITLES ===',
+            viralTitles.join('\n'),
+            '',
+            '=== SEO DESCRIPTIONS ===',
+            seoDescriptions.join('\n'),
+            '',
+            '=== HASHTAGS ===',
+            cleanHashtags.map(t => `#${t}`).join(' '),
+            '',
+            '=== THUMBNAIL IDEAS ===',
+            thumbnailIdeas.join('\n'),
+            '',
+            '=== AI IMAGE PROMPTS ===',
+            aiImagePrompts.join('\n'),
+          ].join('\n')}
+          className="border border-border px-4 py-2 rounded-md font-medium text-sm"
+        />
       </div>
     </div>
   );
@@ -124,6 +281,8 @@ function ContentResults({ state }: { state: GenerateContentState }) {
 function MediaResults({ state }: { state: AnalyzeMediaState }) {
   if (!state.data) return null;
   const { data } = state;
+  const cleanHashtags = data.hashtags.map(stripHash);
+
   return (
     <div className="mt-8 grid gap-6 md:grid-cols-2">
       <Card>
@@ -132,31 +291,58 @@ function MediaResults({ state }: { state: AnalyzeMediaState }) {
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <h3 className="text-lg font-semibold">Title</h3>
+            <div className="flex items-center justify-between mb-1">
+              <h3 className="text-lg font-semibold">Title</h3>
+              <CopyButton text={data.title} />
+            </div>
             <p className="text-muted-foreground">{data.title}</p>
           </div>
           <div>
-            <h3 className="mt-4 text-lg font-semibold">Description</h3>
+            <div className="flex items-center justify-between mb-1">
+              <h3 className="mt-4 text-lg font-semibold">Description</h3>
+              <CopyButton text={data.description} />
+            </div>
             <p className="text-muted-foreground">{data.description}</p>
           </div>
           <div>
-            <h3 className="mt-4 text-lg font-semibold">Hashtags</h3>
+            <div className="flex items-center justify-between mb-1">
+              <h3 className="mt-4 text-lg font-semibold">Hashtags</h3>
+              <CopyAllButton items={cleanHashtags.map(t => `#${t}`)} label="Copy All" />
+            </div>
             <div className="flex flex-wrap gap-2 pt-2">
-              {data.hashtags.map((tag) => (
-                <span
-                  key={tag}
-                  className="rounded-full bg-secondary px-3 py-1 text-sm font-medium"
-                >
-                  #{tag}
-                </span>
+              {cleanHashtags.map((tag) => (
+                <div key={tag} className="flex items-center gap-1">
+                  <span className="rounded-full bg-secondary px-3 py-1 text-sm font-medium">
+                    #{tag}
+                  </span>
+                  <CopyButton text={`#${tag}`} />
+                </div>
               ))}
             </div>
+          </div>
+          {/* Copy all media content */}
+          <div className="pt-4 border-t">
+            <CopyButton
+              text={[
+                `Title: ${data.title}`,
+                '',
+                `Description: ${data.description}`,
+                '',
+                `Hashtags: ${cleanHashtags.map(t => `#${t}`).join(' ')}`,
+              ].join('\n')}
+              className="border border-border px-4 py-2 rounded-md font-medium text-sm w-full justify-center"
+            />
           </div>
         </CardContent>
       </Card>
        {data.thumbnailDataUri && (
           <Card>
-            <CardHeader><CardTitle className="font-headline">Suggested Thumbnail</CardTitle></CardHeader>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="font-headline">Suggested Thumbnail</CardTitle>
+                <CopyButton text={data.thumbnailDataUri} />
+              </div>
+            </CardHeader>
             <CardContent>
                 <Image
                     src={data.thumbnailDataUri}
@@ -190,7 +376,10 @@ function SeoResults({ state }: { state: AnalyzeSeoState }) {
             </Card>
             <Card>
                 <CardHeader>
-                    <CardTitle className="font-headline">Actionable Recommendations</CardTitle>
+                    <div className="flex items-center justify-between">
+                        <CardTitle className="font-headline">Actionable Recommendations</CardTitle>
+                        <CopyButton text={data.actionableRecommendations} />
+                    </div>
                 </CardHeader>
                 <CardContent>
                     <p className="text-muted-foreground whitespace-pre-wrap">{data.actionableRecommendations}</p>
@@ -198,7 +387,10 @@ function SeoResults({ state }: { state: AnalyzeSeoState }) {
             </Card>
             <Card>
                 <CardHeader>
-                    <CardTitle className="font-headline">Keyword Density</CardTitle>
+                    <div className="flex items-center justify-between">
+                        <CardTitle className="font-headline">Keyword Density</CardTitle>
+                        <CopyButton text={data.keywordDensityAnalysis} />
+                    </div>
                 </CardHeader>
                 <CardContent>
                     <p className="text-muted-foreground whitespace-pre-wrap">{data.keywordDensityAnalysis}</p>
@@ -206,7 +398,10 @@ function SeoResults({ state }: { state: AnalyzeSeoState }) {
             </Card>
             <Card>
                 <CardHeader>
-                    <CardTitle className="font-headline">Readability Analysis</CardTitle>
+                    <div className="flex items-center justify-between">
+                        <CardTitle className="font-headline">Readability Analysis</CardTitle>
+                        <CopyButton text={data.readabilityAnalysis} />
+                    </div>
                 </CardHeader>
                 <CardContent>
                     <p className="text-muted-foreground whitespace-pre-wrap">{data.readabilityAnalysis}</p>
