@@ -113,6 +113,25 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        {/* 
+          PWA INSTALL CAPTURE — runs before ANY React/JS code.
+          beforeinstallprompt fires once on page load; if we miss it, install won't work.
+          Storing in window.__pwaInstallPrompt so React components can read it after hydration.
+        */}
+        <script dangerouslySetInnerHTML={{ __html: `
+          window.__pwaInstallPrompt = null;
+          window.__pwaInstalled = false;
+          window.addEventListener('beforeinstallprompt', function(e) {
+            e.preventDefault();
+            window.__pwaInstallPrompt = e;
+            window.dispatchEvent(new CustomEvent('pwaPromptReady'));
+          });
+          window.addEventListener('appinstalled', function() {
+            window.__pwaInstallPrompt = null;
+            window.__pwaInstalled = true;
+            window.dispatchEvent(new CustomEvent('pwaInstalled'));
+          });
+        `}} />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}

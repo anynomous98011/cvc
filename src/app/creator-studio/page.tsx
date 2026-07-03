@@ -150,7 +150,7 @@ function ContentResults({ state }: { state: GenerateContentState }) {
   return (
     <div className="mt-8 space-y-6">
       <div className="grid gap-6 md:grid-cols-2">
-        {/* Viral Titles — Copy All only */}
+        {/* Viral Titles — click any to copy, or Copy All */}
         <Card>
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
@@ -163,13 +163,14 @@ function ContentResults({ state }: { state: GenerateContentState }) {
             </div>
           </CardHeader>
           <CardContent>
-            <ul className="list-inside list-disc space-y-2">
-              {viralTitles.map((item, i) => <li key={i}>{item}</li>)}
-            </ul>
+            <div className="space-y-2">
+              {viralTitles.map((item, i) => <ClickableTile key={i} text={item} index={i} />)}
+            </div>
+            <p className="text-xs text-muted-foreground mt-3">Click any title to copy it</p>
           </CardContent>
         </Card>
 
-        {/* SEO Descriptions — Copy All only */}
+        {/* SEO Descriptions — click any to copy, or Copy All */}
         <Card>
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
@@ -182,9 +183,10 @@ function ContentResults({ state }: { state: GenerateContentState }) {
             </div>
           </CardHeader>
           <CardContent>
-            <ul className="list-inside list-disc space-y-2">
-              {seoDescriptions.map((item, i) => <li key={i}>{item}</li>)}
-            </ul>
+            <div className="space-y-2">
+              {seoDescriptions.map((item, i) => <ClickableTile key={i} text={item} index={i} />)}
+            </div>
+            <p className="text-xs text-muted-foreground mt-3">Click any description to copy it</p>
           </CardContent>
         </Card>
       </div>
@@ -285,6 +287,39 @@ function HashtagPill({ tag }: { tag: string }) {
     </button>
   );
 }
+
+// Clickable text tile — click = copy that single item (same UX as hashtag pills)
+function ClickableTile({ text, index }: { text: string; index: number }) {
+  const [copied, setCopied] = useState(false);
+  const handleClick = useCallback(async () => {
+    try { await navigator.clipboard.writeText(text); } catch { /* ignore */ }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1800);
+  }, [text]);
+
+  return (
+    <button
+      onClick={handleClick}
+      title="Click to copy"
+      className={`w-full text-left rounded-lg px-3 py-2.5 text-sm transition-all duration-200 flex items-start gap-2 group ${
+        copied
+          ? 'bg-green-500/10 text-green-400 border border-green-500/30'
+          : 'bg-secondary/50 hover:bg-secondary border border-transparent hover:border-border'
+      }`}
+    >
+      <span className={`flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold mt-0.5 ${
+        copied ? 'bg-green-500/20 text-green-400' : 'bg-muted text-muted-foreground'
+      }`}>
+        {copied ? <Check className="h-3 w-3" /> : index + 1}
+      </span>
+      <span className="flex-1">{text}</span>
+      {!copied && (
+        <Copy className="h-3.5 w-3.5 flex-shrink-0 mt-0.5 opacity-0 group-hover:opacity-50 transition-opacity" />
+      )}
+    </button>
+  );
+}
+
 
 // ─── Results: Media content ───
 function MediaResults({ state }: { state: AnalyzeMediaState }) {
